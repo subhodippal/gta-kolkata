@@ -1,0 +1,4 @@
+osm_raw/
+node_modules/
+.DS_Store
+*.log

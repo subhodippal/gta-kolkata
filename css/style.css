@@ -1,0 +1,276 @@
+:root {
+  --ink: #fff7e8;
+  --accent: #ffcf3f;      /* Kolkata taxi yellow */
+  --accent2: #e8452c;     /* sindoor red */
+  --panel: rgba(18, 12, 8, 0.82);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: #1b1410; color: var(--ink);
+  font-family: "Hind Siliguri", "Trebuchet MS", "Segoe UI", system-ui, sans-serif; user-select: none; -webkit-user-select: none;
+  touch-action: none;
+}
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+
+/* ---------- loader ---------- */
+#loader {
+  position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 30%, #6b3a1c 0%, #2a160c 55%, #120a06 100%); z-index: 50; gap: 22px; padding: 16px;
+}
+.title { text-align: center; line-height: .9; text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255, 140, 40, .5); }
+.t1 { font-size: clamp(48px, 11vw, 120px); font-weight: 900; letter-spacing: 4px; color: var(--accent); font-family: Impact, "Arial Black", "Hind Siliguri", sans-serif; }
+.t2 { font-size: clamp(34px, 7vw, 76px); font-weight: 900; color: #ff6fb5; font-family: Impact, "Arial Black", "Hind Siliguri", sans-serif; letter-spacing: 8px; }
+.t3 { margin-top: 10px; font-size: 16px; letter-spacing: 3px; opacity: .85; text-shadow: 1px 1px 0 #000; }
+.bar { width: min(420px, 80vw); height: 10px; border: 2px solid var(--accent); border-radius: 6px; overflow: hidden; }
+#loadbar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), #ff6fb5); transition: width .2s; }
+#loadmsg { font-size: 14px; opacity: .8; min-height: 18px; }
+#startBtn {
+  font: 900 28px Impact, "Arial Black", "Hind Siliguri", sans-serif; letter-spacing: 4px; padding: 12px 56px; border-radius: 8px; cursor: pointer;
+  border: 3px solid #000; background: var(--accent); color: #000; box-shadow: 4px 4px 0 #000;
+}
+#startBtn:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 #000; }
+.credit { position: absolute; bottom: 12px; font-size: 11px; opacity: .6; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+#loc { position: absolute; top: 14px; left: 16px; text-shadow: 2px 2px 0 #000, 0 0 6px #000; }
+#district { font: 900 26px Impact, "Arial Black", "Hind Siliguri", sans-serif; color: var(--accent); letter-spacing: 1px; }
+#street { font-size: 15px; font-weight: bold; }
+#minimapWrap {
+  position: absolute; left: 16px; bottom: 16px; width: 220px; height: 220px; border-radius: 50%; overflow: hidden;
+  border: 4px solid rgba(0, 0, 0, .75); box-shadow: 0 0 0 2px rgba(255, 207, 63, .6), 0 4px 14px rgba(0, 0, 0, .6);
+}
+#minimap { width: 100%; height: 100%; display: block; }
+#north { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font: bold 12px sans-serif; color: #fff; text-shadow: 1px 1px 0 #000; }
+#topright { position: absolute; top: 14px; right: 16px; text-align: right; text-shadow: 2px 2px 0 #000; }
+#clock { font: 900 30px Impact, "Arial Black", "Hind Siliguri", sans-serif; }
+#visited { font-size: 14px; font-weight: bold; color: var(--accent); }
+.hint { font-size: 12px; opacity: .8; margin-top: 4px; }
+#prompt {
+  position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--panel); padding: 10px 18px;
+  border-radius: 8px; border-left: 4px solid var(--accent); font-size: 16px; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+}
+#prompt b { color: var(--accent); }
+#toast {
+  position: absolute; top: 90px; left: 50%; transform: translateX(-50%); background: var(--panel); padding: 10px 18px; border-radius: 8px;
+  font-size: 16px; max-width: 80vw; text-align: center; border: 1px solid rgba(255, 207, 63, .4);
+}
+
+/* ---------- panels ---------- */
+#panel, #help { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 30; background: rgba(0, 0, 0, .35); }
+.pcard {
+  background: var(--panel); border: 2px solid var(--accent); border-radius: 12px; padding: 20px 24px; width: min(460px, 92vw);
+  max-height: 86vh; overflow: auto; box-shadow: 6px 6px 0 #000;
+}
+#pkind { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
+#pname { font: 900 28px Impact, "Arial Black", "Hind Siliguri", sans-serif; margin: 4px 0; }
+#pstreet { font-size: 13px; opacity: .8; margin-bottom: 12px; }
+#pbody { font-size: 15px; line-height: 1.45; }
+#pbody ul { padding-left: 18px; margin: 6px 0; }
+#pbody .price { color: var(--accent); float: right; }
+.pcard button, .bmside button {
+  margin-top: 14px; padding: 8px 18px; border-radius: 6px; border: 2px solid #000; background: var(--accent); color: #000; font-weight: bold; cursor: pointer;
+}
+.pcard h3 { margin: 0 0 10px; color: var(--accent); font-family: Impact, "Hind Siliguri", sans-serif; letter-spacing: 1px; font-size: 24px; }
+#help table { width: 100%; border-collapse: collapse; font-size: 14px; }
+#help td { padding: 5px 4px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+#help td:first-child { color: var(--accent); font-weight: bold; white-space: nowrap; }
+
+
+.bmside { width: 250px; overflow: auto; }
+.bmside h3 { margin: 0 0 8px; font-family: Impact, "Hind Siliguri", sans-serif; color: var(--accent); font-size: 24px; }
+#travelList button { display: block; width: 100%; text-align: left; margin: 4px 0; background: rgba(255, 207, 63, .12); color: var(--ink); border: 1px solid rgba(255, 207, 63, .4); }
+#travelList button:hover { background: var(--accent); color: #000; }
+.small { font-size: 12px; opacity: .7; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 4px; vertical-align: middle; }
+
+/* ---------- touch ---------- */
+#touch { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+#joy {
+  position: absolute; left: 4vw; bottom: 6vh; width: 150px; height: 150px; border-radius: 50%; pointer-events: auto;
+  background: radial-gradient(circle, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); border: 2px solid rgba(255, 255, 255, .35);
+}
+#joyKnob { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(255, 207, 63, .75); border: 2px solid #000; }
+#tbtns { position: absolute; right: 3vw; bottom: 5vh; display: grid; grid-template-columns: repeat(3, 66px); gap: 10px; pointer-events: auto; direction: rtl; }
+.tb {
+  width: 66px; height: 66px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, .6); background: rgba(30, 20, 10, .55); color: #fff;
+  font-size: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; direction: ltr; touch-action: none;
+}
+.tb small { font-size: 9px; font-weight: bold; letter-spacing: 1px; }
+.tb.big { background: rgba(232, 69, 44, .65); }
+.tb.on { background: var(--accent); color: #000; }
+#rotate { position: fixed; inset: 0; z-index: 99; background: #120a06; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 22px; }
+#rotate div { font-size: 22px; line-height: 1.6; }
+
+body.touch #minimapWrap { width: 140px; height: 140px; left: auto; right: 12px; top: 70px; bottom: auto; }
+body.touch #topright { top: 6px; }
+body.touch #topright .hint { display: none; }
+body.touch #prompt { bottom: auto; top: 70px; }
+body.touch #district { font-size: 20px; }
+@media (max-height: 500px) {
+  .bmwrap { flex-direction: row; }
+  .bmside { width: 180px; font-size: 12px; }
+}
+
+/* ---------- Bengali tweaks: Bengali glyphs need more line height, bold Hind Siliguri for headings ---------- */
+body.lang-bn .t1, body.lang-bn .t2, body.lang-bn #district, body.lang-bn #pname, body.lang-bn .pcard h3,
+body.lang-bn .bmside h3, body.lang-bn #startBtn, body.lang-bn #exploreBtn, body.lang-bn #clock {
+  font-family: "Hind Siliguri", sans-serif; font-weight: 700; letter-spacing: 0; line-height: 1.15;
+}
+body.lang-bn .t2 { letter-spacing: 2px; }
+body.lang-bn .tb small { font-size: 10px; letter-spacing: 0; }
+
+.startrow { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+#exploreBtn {
+  font: 900 24px Impact, "Arial Black", "Hind Siliguri", sans-serif; letter-spacing: 2px; padding: 12px 34px; border-radius: 8px; cursor: pointer;
+  border: 3px solid #000; background: #ff6fb5; color: #000; box-shadow: 4px 4px 0 #000;
+}
+.langbtn { position: absolute; top: 16px; right: 16px; }
+.langbtn, .smallbtn {
+  font: 600 14px "Hind Siliguri", sans-serif; padding: 6px 14px; border-radius: 20px; cursor: pointer; pointer-events: auto;
+  border: 2px solid var(--accent); background: rgba(0, 0, 0, .45); color: var(--ink);
+}
+.hudbtns { display: flex; gap: 6px; justify-content: flex-end; margin-top: 6px; }
+.smallbtn { padding: 3px 10px; font-size: 13px; }
+.pbtns { display: flex; gap: 10px; flex-wrap: wrap; }
+#pgo { background: #ff6fb5; }
+
+/* ---------- view (fly-over) mode ---------- */
+#viewui { position: fixed; inset: 0; z-index: 11; pointer-events: none; }
+#viewui .vbar {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: var(--panel); border-radius: 10px;
+  padding: 8px 16px; text-align: center; max-width: min(820px, 70vw); border: 1px solid rgba(255, 207, 63, .4);
+}
+.vtitle { font-weight: 700; font-size: 18px; color: var(--accent); }
+#alt { color: var(--ink); font-weight: 400; font-size: 14px; margin-left: 8px; }
+.vhelp { font-size: 12px; opacity: .85; margin-top: 2px; }
+#viewui .vside {
+  position: absolute; right: 12px; top: 90px; width: 220px; max-height: calc(100vh - 110px); overflow: auto; pointer-events: auto;
+  background: var(--panel); border-radius: 10px; padding: 10px; border: 1px solid rgba(255, 207, 63, .4);
+}
+.vside h4 { margin: 10px 0 6px; color: var(--accent); font-size: 14px; }
+.vside button { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  background: rgba(255, 207, 63, .12); color: var(--ink); border: 1px solid rgba(255, 207, 63, .4); font: 14px "Hind Siliguri", sans-serif; }
+.vside button:hover { background: var(--accent); color: #000; }
+#viewExit { background: var(--accent) !important; color: #000 !important; font-weight: 700 !important; text-align: center !important; }
+.vcheck { font-size: 13px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+#tooltip {
+  position: absolute; background: rgba(10, 6, 3, .9); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 10px;
+  font-size: 14px; max-width: 280px; transform: translate(14px, 14px); white-space: normal;
+}
+#tooltip b { color: var(--accent); }
+#tooltip small { opacity: .75; display: block; }
+#labels { position: absolute; inset: 0; overflow: hidden; }
+.lbl {
+  position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 13px; font-weight: 600; padding: 2px 8px;
+  border-radius: 10px; background: rgba(10, 6, 3, .72); border-left: 3px solid var(--c, #ffcf3f); text-shadow: 0 1px 2px #000;
+}
+.lbl.big { font-size: 16px; font-weight: 700; color: var(--accent); background: rgba(10, 6, 3, .85); border: 2px solid var(--accent); }
+.lbl.road { background: none; border: none; color: #fff; font-size: 12px; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+body.viewing #hud #loc, body.viewing #hud #prompt { display: none; }
+body.viewing #touch .game { display: none; }
+body.touch #viewui .vside { width: 170px; top: 160px; font-size: 12px; }
+body.touch #viewui .vbar { max-width: 60vw; }
+
+/* Bengali conjunct letters break apart with letter-spacing */
+body.lang-bn .t3, body.lang-bn .t1, body.lang-bn #district, body.lang-bn .tb small, body.lang-bn #pkind { letter-spacing: 0; }
+body.viewing #toast { top: 118px; }
+body.touch #viewui .vside { left: 8px; right: auto; top: 8px; width: 160px; max-height: 52vh; padding: 6px; }
+body.touch #viewui .vside button { padding: 4px 8px; font-size: 12px; margin: 3px 0; }
+body.touch #viewui .vbar { left: 58%; padding: 4px 10px; }
+body.touch #viewui .vhelp { font-size: 10px; }
+
+/* ---------- interactive map ---------- */
+#bigmap { position: fixed; inset: 0; z-index: 25; background: #9cc7dd; color: #222; }
+#bigcanvas, #mapoverlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+#bigcanvas { visibility: hidden; }
+#mapoverlay { cursor: grab; touch-action: none; }
+#mapoverlay:active { cursor: grabbing; }
+.mapsearch { position: absolute; top: 12px; left: 12px; width: min(420px, calc(100vw - 90px)); z-index: 2; }
+.sbox { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 26px; padding: 6px 8px 6px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+.sbox input { flex: 1; border: 0; outline: 0; font: 16px "Hind Siliguri", sans-serif; background: transparent; min-width: 0; color: #222; }
+.sbox button { border: 0; background: #eef2f7; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 16px; }
+#searchResults { margin-top: 6px; background: #fff; border-radius: 12px; overflow: auto; max-height: 55vh; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+#searchResults:empty { display: none; }
+.sr { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #eee; background: #fff; padding: 8px 12px; cursor: pointer; font-family: "Hind Siliguri", sans-serif; color: #222; }
+.sr:hover { background: #fff6d6; }
+.sri { font-size: 20px; width: 26px; text-align: center; }
+.srt b { display: block; font-size: 15px; }
+.srt small { color: #666; font-size: 12px; }
+.sr-none, .sr-note { padding: 10px 12px; font-size: 13px; color: #666; }
+.maptools { position: absolute; right: 12px; bottom: 60px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }
+.maptools button, #mapClose { width: 40px; height: 40px; border-radius: 8px; border: 0; background: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.3); color: #222; }
+#mapClose { position: absolute; top: 12px; right: 12px; z-index: 3; }
+.maplayers { position: absolute; top: 64px; right: 12px; background: rgba(255,255,255,.95); border-radius: 10px; padding: 6px 10px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.mapside { position: absolute; left: 12px; top: 72px; bottom: 12px; width: 210px; overflow: auto; background: rgba(255,255,255,.93); border-radius: 12px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.25); z-index: 1; }
+.mapside h4 { margin: 6px 4px; font-size: 14px; color: #7a4a00; }
+.mapside button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 5px 6px; border-radius: 6px; cursor: pointer; font: 13px "Hind Siliguri", sans-serif; color: #222; }
+.mapside button:hover { background: #fff1c2; }
+.mapside .small { color: #555; opacity: 1; }
+i.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 2px; }
+#placeCard { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); background: #fff; border-radius: 14px; padding: 12px 14px; width: min(420px, 92vw); box-shadow: 0 4px 16px rgba(0,0,0,.35); z-index: 3; }
+.pc-head { display: flex; gap: 10px; align-items: flex-start; }
+#cardIcon { font-size: 28px; }
+.pc-head b { display: block; font-size: 18px; }
+.pc-head small { display: block; color: #666; font-size: 13px; }
+.pc-btns { display: flex; gap: 8px; margin-top: 10px; }
+.pc-btns button { flex: 1; border: 0; border-radius: 20px; padding: 9px; font: 600 14px "Hind Siliguri", sans-serif; cursor: pointer; background: #eef2f7; color: #222; }
+#cardDir { background: #7b3fe4; color: #fff; }
+#cardGo { background: var(--accent); }
+#cardClose { flex: 0 0 40px; }
+.mapattr { position: absolute; right: 8px; bottom: 4px; font-size: 10px; color: #333; background: rgba(255,255,255,.7); padding: 1px 4px; border-radius: 3px; }
+body.touch .mapside { display: none; }
+body.touch .maplayers { top: auto; bottom: 12px; right: 60px; flex-direction: row; gap: 8px; }
+
+/* ---------- navigation ---------- */
+#navbox { position: fixed; top: 74px; left: 16px; z-index: 12; display: flex; align-items: center; gap: 10px; background: #2f8f5b; color: #fff; border-radius: 12px; padding: 8px 10px 8px 12px; max-width: min(460px, 70vw); box-shadow: 0 3px 10px rgba(0,0,0,.4); }
+#navIcon { font-size: 30px; line-height: 1; }
+.navt #navText { font-weight: 700; font-size: 16px; }
+.navt small { opacity: .9; font-size: 12px; }
+#navClose { border: 0; background: rgba(0,0,0,.25); color: #fff; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; }
+body.touch #navbox { top: 54px; left: 8px; max-width: 55vw; }
+
+/* ---------- metro ---------- */
+#metroPanel { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 30; background: rgba(0,0,0,.4); }
+.pcard.wide { width: min(640px, 94vw); }
+.mline { margin: 12px 0; }
+.mlname { font-weight: 700; color: var(--c); border-left: 6px solid var(--c); padding-left: 8px; filter: brightness(1.4); }
+.mstations { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; padding-left: 8px; border-left: 6px solid var(--c); }
+.mstations button { border: 2px solid var(--c); background: rgba(255,255,255,.08); color: var(--ink); border-radius: 18px; padding: 5px 12px; cursor: pointer; font: 14px "Hind Siliguri", sans-serif; }
+.mstations button:hover { background: var(--c); }
+.mstations button.here { opacity: .5; cursor: default; border-style: dashed; }
+.uc { color: #c39bd3; margin-top: 6px; }
+#metroRide { position: fixed; inset: 0; z-index: 40; background: #0c0d10; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.tunnel { position: absolute; inset: -50%; background: repeating-linear-gradient(90deg, #1a1c22 0 60px, #2a2d35 60px 64px, #1a1c22 64px 160px); animation: tunnel .35s linear infinite; opacity: .9; }
+@keyframes tunnel { from { transform: translateX(0); } to { transform: translateX(-160px); } }
+.ridebox { position: relative; background: rgba(15,15,20,.9); border: 2px solid #444; border-radius: 14px; padding: 16px 20px; width: min(640px, 92vw); text-align: center; }
+.ridetitle { font-weight: 700; font-size: 18px; color: var(--accent); }
+#rideNext { font-size: 22px; font-weight: 700; margin: 10px 0 14px; min-height: 32px; }
+#rideLine { position: relative; height: 8px; background: var(--c, #2b6cd4); border-radius: 4px; margin: 10px 14px; }
+#rideTrain { position: absolute; top: -16px; left: 0; transform: translateX(-50%); font-size: 26px; transition: left 1.5s ease-in-out; }
+#rideStops { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 16px; }
+.rstop { padding: 3px 10px; border-radius: 14px; border: 2px solid var(--c); font-size: 13px; opacity: .55; }
+.rstop.done { opacity: .3; text-decoration: line-through; }
+.rstop.next { opacity: 1; background: var(--c); font-weight: 700; }
+
+.satattr { position: fixed; left: 6px; bottom: 2px; font: 10px sans-serif; color: rgba(255,255,255,.75); text-shadow: 0 0 2px #000; pointer-events: none; z-index: 5; }
+.satattr.hidden { display: none; }
+
+#phase { font-size: 15px; font-weight: 600; color: #ffe08a; text-shadow: 0 1px 3px #000; text-align: right; margin-top: -4px; }
+
+#mapChips { position: absolute; top: 64px; left: 236px; right: 190px; display: flex; gap: 6px; overflow-x: auto; z-index: 2; padding: 2px; scrollbar-width: none; }
+#mapChips button { flex: none; border: 0; border-radius: 18px; background: #fff; padding: 6px 12px; font: 600 13px "Hind Siliguri", sans-serif; color: #333; box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer; white-space: nowrap; }
+#mapChips button.on { background: #1a73e8; color: #fff; }
+#cardPhoto { margin: -12px -14px 10px; border-radius: 14px 14px 0 0; overflow: hidden; position: relative; background: #ddd; }
+#cardPhoto img { display: block; width: 100%; height: 170px; object-fit: cover; }
+#cardPhoto a { position: absolute; right: 6px; bottom: 4px; font-size: 10px; color: #fff; text-shadow: 0 0 3px #000; text-decoration: none; }
+#cardDesc { margin: 8px 0 4px; font-size: 14px; color: #333; line-height: 1.35; }
+#cardDesc:empty { display: none; }
+#catList button small { color: #777; margin-left: 4px; }
+@media (max-width: 900px) { #mapChips { left: 12px; right: 12px; top: 112px; } }
+
+.title .brand-en { font-family: "Arial Black", Impact, sans-serif; letter-spacing: 6px; }
+.title .brand-bn { font-family: "Hind Siliguri", sans-serif; }
+.title .brand-sub { font-style: italic; letter-spacing: 1px; }

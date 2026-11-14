@@ -1,0 +1,21 @@
+"""POI / cuisine type names in Bengali (shared by the map builders)."""
+TYPE_BN = {
+    "restaurant": "রেস্তোরাঁ", "fast_food": "ফাস্ট ফুড", "cafe": "ক্যাফে", "bank": "ব্যাংক", "atm": "এটিএম", "hospital": "হাসপাতাল",
+    "pharmacy": "ওষুধের দোকান", "hotel": "হোটেল", "guest_house": "অতিথিশালা", "hostel": "হোস্টেল", "place_of_worship": "উপাসনালয়",
+    "police": "থানা", "cinema": "সিনেমা হল", "fuel": "পেট্রোল পাম্প", "attraction": "দর্শনীয় স্থান", "museum": "জাদুঘর",
+    "artwork": "শিল্পকর্ম", "information": "তথ্যকেন্দ্র", "viewpoint": "দৃশ্যস্থল", "station": "স্টেশন", "ferry_terminal": "ফেরিঘাট",
+    "blood_bank": "ব্লাড ব্যাংক", "clothes": "পোশাকের দোকান", "confectionery": "মিষ্টির দোকান", "books": "বইয়ের দোকান",
+    "jewelry": "গয়নার দোকান", "electronics": "ইলেকট্রনিক্স", "computer": "কম্পিউটারের দোকান", "mobile_phone": "মোবাইলের দোকান",
+    "supermarket": "সুপারমার্কেট", "ticket": "টিকিট কাউন্টার", "car": "গাড়ির শোরুম", "beauty": "বিউটি পার্লার", "optician": "চশমার দোকান",
+    "convenience": "মুদির দোকান", "bakery": "বেকারি", "shoes": "জুতোর দোকান", "sweets": "মিষ্টির দোকান", "hairdresser": "সেলুন",
+    "department_store": "ডিপার্টমেন্ট স্টোর", "mall": "শপিং মল", "gift": "উপহারের দোকান", "tailor": "দর্জি", "furniture": "আসবাবের দোকান",
+    "hardware": "হার্ডওয়্যার", "stationery": "স্টেশনারি", "bag": "ব্যাগের দোকান", "watches": "ঘড়ির দোকান", "travel_agency": "ট্রাভেল এজেন্সি",
+    "chemist": "কেমিস্ট", "music": "গানের দোকান", "variety_store": "ভ্যারাইটি স্টোর", "boutique": "বুটিক", "tea": "চায়ের দোকান",
+    "coffee": "কফি", "kiosk": "গুমটি", "laundry": "লন্ড্রি", "copyshop": "জেরক্সের দোকান", "photo": "ফটো স্টুডিও", "art": "শিল্প",
+    "indian": "ভারতীয়", "chinese": "চাইনিজ", "bengali": "বাঙালি", "regional": "আঞ্চলিক", "pizza": "পিৎজা", "burger": "বার্গার",
+    "mughlai": "মোগলাই", "biryani": "বিরিয়ানি", "italian": "ইতালীয়", "continental": "কন্টিনেন্টাল", "north_indian": "উত্তর ভারতীয়",
+    "south_indian": "দক্ষিণ ভারতীয়", "vegetarian": "নিরামিষ", "ice_cream": "আইসক্রিম", "sandwich": "স্যান্ডউইচ", "chicken": "চিকেন",
+    "thai": "থাই", "japanese": "জাপানি", "tibetan": "তিব্বতি", "momo": "মোমো", "kebab": "কাবাব", "seafood": "সামুদ্রিক খাবার",
+    "american": "আমেরিকান", "mexican": "মেক্সিকান", "asian": "এশীয়", "international": "আন্তর্জাতিক", "street_food": "রাস্তার খাবার",
+    "fish": "মাছ", "cake": "কেক", "dessert": "ডেজার্ট", "juice": "জুস", "breakfast": "প্রাতরাশ", "rolls": "রোল", "roll": "রোল",
+}

@@ -1,0 +1,19 @@
+[out:json][timeout:180];
+(
+  relation["route"="subway"](22.538,88.332,22.592,88.366);
+  way["railway"~"subway|construction"](22.538,88.332,22.592,88.366);
+  nwr["railway"="station"](22.538,88.332,22.592,88.366);
+  nwr["station"="subway"](22.538,88.332,22.592,88.366);
+  node["railway"="subway_entrance"](22.538,88.332,22.592,88.366);
+  node["highway"="bus_stop"](22.538,88.332,22.592,88.366);
+  node["public_transport"="platform"]["bus"="yes"](22.538,88.332,22.592,88.366);
+  node["highway"="traffic_signals"](22.538,88.332,22.592,88.366);
+  node["highway"="crossing"](22.538,88.332,22.592,88.366);
+  node["natural"="tree"](22.538,88.332,22.592,88.366);
+  way["landuse"](22.538,88.332,22.592,88.366);
+  node["amenity"~"bench|drinking_water|toilets|post_box|parking|taxi|bus_station|marketplace|school|college|university|library|theatre|arts_centre|fountain|clock"](22.538,88.332,22.592,88.366);
+  node["office"]["name"](22.538,88.332,22.592,88.366);
+  node["historic"]["name"](22.538,88.332,22.592,88.366);
+  node["leisure"]["name"](22.538,88.332,22.592,88.366);
+);
+out geom;

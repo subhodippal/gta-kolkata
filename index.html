@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1b1410" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kolkata — Ganges, Tea &amp; Adda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body class="lang-bn">
+  <canvas id="game"></canvas>
+
+  <!-- Loading / title screen -->
+  <div id="loader">
+    <button id="langBtn" class="langbtn" data-i18n="lang_switch">English</button>
+    <div class="title">
+      <div class="t1 brand-bn">কলকাতা</div>
+      <div class="t3 brand-sub">Ganges, Tea &amp; Adda</div>
+    </div>
+    <div class="bar"><div id="loadbar"></div></div>
+    <div id="loadmsg">…</div>
+    <div class="startrow">
+      <button id="startBtn" class="hidden" data-i18n="play">খেলুন</button>
+      <button id="exploreBtn" class="hidden" data-i18n="explore">শহর দেখুন</button>
+    </div>
+    <div class="credit" data-i18n="credit"></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="loc">
+      <div id="district"></div>
+      <div id="street">—</div>
+    </div>
+    <div id="minimapWrap"><canvas id="minimap" width="220" height="220"></canvas><div id="north">N</div></div>
+    <div id="topright">
+      <div id="clock">১০:০০</div>
+      <div id="phase"></div>
+      <div id="visited"></div>
+      <div class="hint" data-i18n="hud_hint"></div>
+      <div class="hudbtns">
+        <button id="voiceBtn" class="smallbtn" title="N">🔊</button>
+        <button id="langBtn2" class="smallbtn" title="L" data-i18n="lang_switch">English</button>
+      </div>
+    </div>
+    <div id="prompt" class="hidden"></div>
+    <div id="toast" class="hidden"></div>
+  </div>
+
+  <!-- View (fly-over) mode -->
+  <div id="viewui" class="hidden">
+    <div id="labels"></div>
+    <div id="tooltip" class="hidden"></div>
+    <div class="vbar">
+      <div class="vtitle">🦅 <span data-i18n="view_title"></span> <span id="alt"></span></div>
+      <div class="vhelp" id="vhelp" data-i18n="view_help"></div>
+    </div>
+    <div class="vside">
+      <button id="viewExit" data-i18n="view_exit"></button>
+      <label class="vcheck"><input type="checkbox" id="labelsChk" checked /> <span data-i18n="view_labels"></span></label>
+      <label class="vcheck"><input type="checkbox" id="metroChk" checked /> Ⓜ <span data-i18n="view_metro"></span></label>
+      <label class="vcheck"><input type="checkbox" id="satChk" checked /> 🛰 <span data-i18n="view_sat"></span></label>
+      <h4 data-i18n="view_places"></h4>
+      <div id="flyList"></div>
+    </div>
+  </div>
+
+  <!-- Info panel for places -->
+  <div id="panel" class="hidden">
+    <div class="pcard">
+      <div id="pkind"></div>
+      <div id="pname"></div>
+      <div id="pstreet"></div>
+      <div id="pbody"></div>
+      <div class="pbtns">
+        <button id="pgo" class="hidden" data-i18n="go_here"></button>
+        <button id="pclose" data-i18n="close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive city map: search, directions, metro, buses -->
+  <div id="bigmap" class="hidden">
+    <canvas id="bigcanvas"></canvas>
+    <canvas id="mapoverlay"></canvas>
+    <div class="mapsearch">
+      <div class="sbox">
+        <span>🔎</span>
+        <input id="searchInput" type="search" autocomplete="off" data-i18n-ph="search_ph" />
+        <button id="searchOnline" data-i18n-title="search_online" title="">🌐</button>
+      </div>
+      <div id="searchResults"></div>
+    </div>
+    <div id="mapChips"></div>
+    <div class="maptools">
+      <button id="zoomIn">＋</button><button id="zoomOut">－</button><button id="myLoc" data-i18n-title="my_location">◎</button>
+    </div>
+    <div class="maplayers">
+      <label><input type="checkbox" id="lay_metro" checked /> Ⓜ <span data-i18n="layer_metro"></span></label>
+      <label><input type="checkbox" id="lay_bus" checked /> 🚌 <span data-i18n="layer_bus"></span></label>
+      <label><input type="checkbox" id="lay_places" checked /> 🛍 <span data-i18n="layer_places"></span></label>
+      <label><input type="checkbox" id="lay_sat" /> 🛰 <span data-i18n="layer_sat"></span></label>
+    </div>
+    <div class="mapside">
+      <div id="catBox" class="hidden"><h4 id="catTitle"></h4><div id="catList"></div></div>
+      <h4 data-i18n="famous_places"></h4>
+      <div id="famousList"></div>
+      <h4 data-i18n="metro_stations"></h4>
+      <div id="metroList"></div>
+      <p class="small" data-i18n="map_hint"></p>
+    </div>
+    <div id="placeCard" class="hidden">
+      <div id="cardPhoto" class="hidden"><img id="cardImg" alt="" /><a id="cardCredit" target="_blank" rel="noopener"></a></div>
+      <div class="pc-head"><span id="cardIcon">📍</span><div><b id="cardTitle"></b><small id="cardSub"></small><small id="cardDist"></small></div></div>
+      <p id="cardDesc"></p>
+      <div class="pc-btns">
+        <button id="cardDir">🧭 <span data-i18n="directions"></span></button>
+        <button id="cardGo">⚡ <span data-i18n="teleport"></span></button>
+        <button id="cardClose">✕</button>
+      </div>
+    </div>
+    <button id="mapClose">✕</button>
+    <div class="mapattr" id="mapAttr">© OpenStreetMap contributors</div>
+  </div>
+
+  <!-- Navigation box -->
+  <div id="navbox" class="hidden">
+    <div id="navIcon">⬆</div>
+    <div class="navt"><div id="navText"></div><small><span id="navDest"></span> · <span id="navRemain"></span></small></div>
+    <button id="navClose">✕</button>
+  </div>
+
+  <!-- Metro -->
+  <div id="metroPanel" class="hidden">
+    <div class="pcard wide">
+      <h3>Ⓜ <span data-i18n="metro_title"></span></h3>
+      <div class="small"><span data-i18n="metro_from"></span> <b id="metroFrom"></b> — <span data-i18n="metro_choose"></span></div>
+      <div id="metroLines"></div>
+      <div class="small uc" id="metroNote"></div>
+      <button id="metroClose" data-i18n="close_plain"></button>
+    </div>
+  </div>
+  <div id="metroRide" class="hidden">
+    <div class="tunnel"></div>
+    <div class="ridebox">
+      <div class="ridetitle">🚇 <span id="rideTitle"></span></div>
+      <div id="rideNext"></div>
+      <div id="rideLine"><div id="rideTrain">🚇</div></div>
+      <div id="rideStops"></div>
+    </div>
+  </div>
+
+  <!-- Help -->
+  <div id="help" class="hidden">
+    <div class="pcard">
+      <h3 data-i18n="help_title"></h3>
+      <table>
+        <tr><td data-i18n="key_arrows"></td><td data-i18n="help_move"></td></tr>
+        <tr><td>Shift</td><td data-i18n="help_run"></td></tr>
+        <tr><td>Space</td><td data-i18n="help_jump"></td></tr>
+        <tr><td data-i18n="key_lclick"></td><td data-i18n="help_punch"></td></tr>
+        <tr><td data-i18n="key_rclick"></td><td data-i18n="help_kick"></td></tr>
+        <tr><td>E</td><td data-i18n="help_use"></td></tr>
+        <tr><td data-i18n="key_mouse"></td><td data-i18n="help_look"></td></tr>
+        <tr><td data-i18n="key_wheel"></td><td data-i18n="help_zoom"></td></tr>
+        <tr><td>M</td><td data-i18n="help_map"></td></tr>
+        <tr><td>T</td><td data-i18n="time_key"></td></tr>
+        <tr><td>V</td><td data-i18n="help_view"></td></tr>
+        <tr><td>/</td><td data-i18n="help_search"></td></tr>
+        <tr><td>N</td><td data-i18n="help_sound"></td></tr>
+        <tr><td>L</td><td data-i18n="help_lang"></td></tr>
+        <tr><td>Esc</td><td data-i18n="help_esc"></td></tr>
+      </table>
+      <button id="hclose" data-i18n="close_plain"></button>
+    </div>
+  </div>
+
+  <!-- Mobile controls -->
+  <div id="touch" class="hidden">
+    <div id="joy"><div id="joyKnob"></div></div>
+    <div id="tbtns">
+      <button data-k="jump" class="tb big game">⤒<small data-i18n="tb_jump"></small></button>
+      <button data-k="punch" class="tb big game">👊<small data-i18n="tb_punch"></small></button>
+      <button data-k="kick" class="tb game">🦶<small data-i18n="tb_kick"></small></button>
+      <button data-k="run" class="tb game">»<small data-i18n="tb_run"></small></button>
+      <button data-k="use" class="tb game">E<small data-i18n="tb_use"></small></button>
+      <button data-k="map" class="tb">🗺<small data-i18n="tb_map"></small></button>
+      <button data-k="view" class="tb">🦅<small data-i18n="tb_view"></small></button>
+    </div>
+  </div>
+  <div id="rotate" class="hidden"><div>⟳<br /><span data-i18n="rotate"></span></div></div>
+
+  <script type="module" src="js/main.js"></script>
+  <div id="satAttr" class="satattr">🛰 Sentinel-2 cloudless 2023 © EOX · © OpenStreetMap</div>
+</body>
+</html>

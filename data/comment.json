@@ -1,0 +1,319 @@
+{
+ "meta": {
+  "note": "Every spoken (audio) line in the game. Each line is shown on screen and read aloud with the browser's speech voice (bn-IN for Bengali, en-IN for English). {placeholders} are filled in by the game.",
+  "voice": {
+   "bn": "bn-IN",
+   "en": "en-IN"
+  },
+  "rate": {
+   "bn": 0.95,
+   "en": 1.0
+  }
+ },
+ "welcome": {
+  "bn": "কলকাতায় স্বাগতম! আপনি এখন এসপ্ল্যানেডে, শহীদ মিনারের পাশে। মানচিত্রের জন্য M আর সাহায্যের জন্য H টিপুন।",
+  "en": "Welcome to Kolkata! You are at Esplanade, beside the Shaheed Minar. Press M for the city map and H for help."
+ },
+ "welcome_view": {
+  "bn": "শহর দেখার মোডে স্বাগতম! পাখির মতো উড়ে উড়ে পুরো কলকাতা ঘুরে দেখুন।",
+  "en": "Welcome to view mode! Fly like a bird and explore all of Kolkata."
+ },
+ "river": {
+  "bn": "হুগলি নদী সাঁতরে পার হওয়া যাবে না — হাওড়া ব্রিজ দিয়ে যান!",
+  "en": "The Hooghly is too deep to swim — use Howrah Bridge!"
+ },
+ "travel": {
+  "bn": "{place}-এ পৌঁছে গেছেন।",
+  "en": "You have arrived at {place}."
+ },
+ "fly_to": {
+  "bn": "{place}-এর দিকে উড়ে যাচ্ছি।",
+  "en": "Flying to {place}."
+ },
+ "view_on": {
+  "bn": "শহর দেখার মোড চালু। খেলায় ফিরতে V টিপুন।",
+  "en": "View mode on. Press V to return to the game."
+ },
+ "view_off": {
+  "bn": "খেলায় ফিরে এলেন।",
+  "en": "Back in the game."
+ },
+ "voice_on": {
+  "bn": "কণ্ঠস্বর চালু হলো।",
+  "en": "Voice is on."
+ },
+ "lang_changed": {
+  "bn": "ভাষা এখন বাংলা।",
+  "en": "Language is now English."
+ },
+ "npc_talk": [
+  {
+   "bn": "নমস্কার!",
+   "en": "Namaskar!"
+  },
+  {
+   "bn": "কী খবর, দাদা?",
+   "en": "What's up, dada?"
+  },
+  {
+   "bn": "কোথায় যাবেন?",
+   "en": "Where are you going?"
+  },
+  {
+   "bn": "চা খাবেন?",
+   "en": "Would you like some tea?"
+  },
+  {
+   "bn": "ভালো আছি, আপনি কেমন আছেন?",
+   "en": "I'm fine, how are you?"
+  },
+  {
+   "bn": "আজ খুব গরম!",
+   "en": "It's so hot today!"
+  },
+  {
+   "bn": "এসপ্ল্যানেড কি এই দিকে?",
+   "en": "Is Esplanade this way?"
+  },
+  {
+   "bn": "আজ ইডেনে খেলা আছে!",
+   "en": "There's a match at Eden today!"
+  },
+  {
+   "bn": "রসগোল্লা খেতেই হবে!",
+   "en": "You must try the rosogolla!"
+  },
+  {
+   "bn": "দাদা, ট্যাক্সি কোথায় পাব?",
+   "en": "Dada, where can I get a taxi?"
+  },
+  {
+   "bn": "আমি হাওড়া যাব।",
+   "en": "I'm going to Howrah."
+  },
+  {
+   "bn": "দুর্গাপুজো আসছে!",
+   "en": "Durga Puja is coming!"
+  },
+  {
+   "bn": "পার্ক স্ট্রিটের বিরিয়ানি খেয়েছেন?",
+   "en": "Have you tried the biryani on Park Street?"
+  },
+  {
+   "bn": "কলেজ স্ট্রিটে বই কিনতে যাচ্ছি।",
+   "en": "I'm off to College Street to buy books."
+  },
+  {
+   "bn": "ফুচকা খাবেন? ওই দিকে দারুণ ফুচকা পাওয়া যায়।",
+   "en": "Want phuchka? There's a great stall over there."
+  }
+ ],
+ "npc_hurt": [
+  {
+   "bn": "এই! কী করছেন?!",
+   "en": "Hey! What are you doing?!"
+  },
+  {
+   "bn": "বাঁচাও!",
+   "en": "Help!"
+  },
+  {
+   "bn": "পুলিশ ডাকব!",
+   "en": "I'll call the police!"
+  },
+  {
+   "bn": "ওরে বাবা রে!",
+   "en": "Oh my god!"
+  },
+  {
+   "bn": "পাগল নাকি?!",
+   "en": "Are you crazy?!"
+  }
+ ],
+ "shop_greet": [
+  {
+   "bn": "আসুন দাদা, কী লাগবে?",
+   "en": "Come in, dada, what do you need?"
+  },
+  {
+   "bn": "আসুন, বসুন — গরম গরম আছে!",
+   "en": "Come, sit — it's fresh and hot!"
+  },
+  {
+   "bn": "আজকের স্পেশাল দেখুন!",
+   "en": "Have a look at today's special!"
+  },
+  {
+   "bn": "নমস্কার, ভেতরে আসুন।",
+   "en": "Namaskar, please come inside."
+  }
+ ],
+ "landmarks": {
+  "howrah": {
+   "bn": "এই হলো হাওড়া ব্রিজ — রবীন্দ্র সেতু। ১৯৪৩ সালে তৈরি, কোনো নাট-বল্টু ছাড়াই!",
+   "en": "This is Howrah Bridge — Rabindra Setu. Built in 1943 without a single nut or bolt!"
+  },
+  "victoria": {
+   "bn": "ভিক্টোরিয়া মেমোরিয়াল — সাদা মার্বেলের এই সৌধ কলকাতার গর্ব।",
+   "en": "Victoria Memorial — this white marble monument is the pride of Kolkata."
+  },
+  "minar": {
+   "bn": "শহীদ মিনার, আটচল্লিশ মিটার উঁচু, ১৮২৮ সালে তৈরি।",
+   "en": "Shaheed Minar, forty-eight metres tall, built in 1828."
+  },
+  "eden": {
+   "bn": "ইডেন গার্ডেন্স — ভারতীয় ক্রিকেটের মক্কা!",
+   "en": "Eden Gardens — the Mecca of Indian cricket!"
+  },
+  "writers": {
+   "bn": "রাইটার্স বিল্ডিং, ১৭৭৭ সালের লাল ভবন।",
+   "en": "Writers' Building, the red building from 1777."
+  },
+  "stpauls": {
+   "bn": "সেন্ট পলস ক্যাথেড্রাল, ১৮৪৭ সালের গির্জা।",
+   "en": "St Paul's Cathedral, consecrated in 1847."
+  },
+  "newmarket": {
+   "bn": "নিউ মার্কেট — কেনাকাটার স্বর্গ, ১৮৭৪ থেকে।",
+   "en": "New Market — a shopper's paradise since 1874."
+  },
+  "station": {
+   "bn": "হাওড়া স্টেশন, ভারতের অন্যতম ব্যস্ত স্টেশন।",
+   "en": "Howrah Station, one of India's busiest stations."
+  },
+  "gpo": {
+   "bn": "জেনারেল পোস্ট অফিস, বিশাল সাদা গম্বুজ নিয়ে।",
+   "en": "The General Post Office, with its great white dome."
+  },
+  "nakhoda": {
+   "bn": "নাখোদা মসজিদ, কলকাতার প্রধান মসজিদ।",
+   "en": "Nakhoda Masjid, the principal mosque of Kolkata."
+  },
+  "museum": {
+   "bn": "ভারতীয় জাদুঘর, ভারতের সবচেয়ে পুরোনো জাদুঘর।",
+   "en": "The Indian Museum, the oldest museum in India."
+  },
+  "sealdah": {
+   "bn": "শিয়ালদহ স্টেশন — লোকাল ট্রেনের প্রাণকেন্দ্র।",
+   "en": "Sealdah Station — the heart of the local trains."
+  },
+  "dakshineswar": {
+   "bn": "দক্ষিণেশ্বর কালী মন্দির, ১৮৫৫ সালে রানি রাসমণি প্রতিষ্ঠা করেন। জয় মা!",
+   "en": "Dakshineswar Kali Temple, founded by Rani Rashmoni in 1855."
+  },
+  "biswabangla": {
+   "bn": "বিশ্ব বাংলা গেট — নিউ টাউনের নতুন পরিচয়।",
+   "en": "Biswa Bangla Gate — the new face of New Town."
+  },
+  "akankha": {
+   "bn": "আকাঙ্ক্ষা মোড়, নিউ টাউন।",
+   "en": "Akankha More, New Town."
+  },
+  "airport": {
+   "bn": "নেতাজি সুভাষচন্দ্র বসু আন্তর্জাতিক বিমানবন্দর। শুভ যাত্রা!",
+   "en": "Netaji Subhas Chandra Bose International Airport. Have a good flight!"
+  },
+  "dumdum": {
+   "bn": "দমদম জংশন।",
+   "en": "Dum Dum Junction."
+  },
+  "belghoria": {
+   "bn": "বেলঘরিয়া।",
+   "en": "Belghoria."
+  },
+  "dankuni": {
+   "bn": "ডানকুনি — দুর্গাপুর এক্সপ্রেসওয়ের শুরু।",
+   "en": "Dankuni — where the Durgapur Expressway begins."
+  },
+  "hatibagan": {
+   "bn": "হাতিবাগান — কেনাকাটার জমজমাট বাজার!",
+   "en": "Hatibagan — a buzzing shopping street!"
+  },
+  "ultadanga": {
+   "bn": "উল্টোডাঙা মোড়।",
+   "en": "Ultadanga crossing."
+  },
+  "borobazar": {
+   "bn": "শিয়ালদহ বড়বাজার — টাটকা সবজি, মাছ!",
+   "en": "Sealdah Boro Bazar — fresh vegetables and fish!"
+  },
+  "newtown": {
+   "bn": "নিউ টাউনে স্বাগতম।",
+   "en": "Welcome to New Town."
+  },
+  "ecopark": {
+   "bn": "ইকো পার্ক — সবুজের মাঝে একটু বিশ্রাম।",
+   "en": "Eco Park — a green escape."
+  },
+  "saltlakestadium": {
+   "bn": "যুবভারতী ক্রীড়াঙ্গন — ডার্বির উন্মাদনা!",
+   "en": "Yuva Bharati Krirangan — derby fever!"
+  },
+  "vidyasagar": {
+   "bn": "বিদ্যাসাগর সেতু, ১৯৯২ সালের কেবল-স্টেড সেতু।",
+   "en": "Vidyasagar Setu, the 1992 cable-stayed bridge."
+  },
+  "nivedita": {
+   "bn": "নিবেদিতা সেতু।",
+   "en": "Nivedita Setu."
+  },
+  "vivekananda": {
+   "bn": "বিবেকানন্দ সেতু, ১৯৩২ সালের বালি ব্রিজ।",
+   "en": "Vivekananda Setu, the Bally Bridge of 1932."
+  }
+ },
+ "nav_start": {
+  "bn": "{place}-এর পথ দেখানো হচ্ছে। দূরত্ব {d}।",
+  "en": "Starting directions to {place}. Distance {d}."
+ },
+ "nav_left": {
+  "bn": "{d} পর বাঁদিকে ঘুরুন। {road}",
+  "en": "In {d}, turn left. {road}"
+ },
+ "nav_right": {
+  "bn": "{d} পর ডানদিকে ঘুরুন। {road}",
+  "en": "In {d}, turn right. {road}"
+ },
+ "nav_straight": {
+  "bn": "সোজা চলুন। {road}",
+  "en": "Continue straight. {road}"
+ },
+ "nav_arrived": {
+  "bn": "আপনি গন্তব্যে পৌঁছে গেছেন: {place}",
+  "en": "You have arrived at {place}."
+ },
+ "nav_reroute": {
+  "bn": "নতুন পথ খোঁজা হচ্ছে…",
+  "en": "Finding a new route…"
+ },
+ "metro_board": {
+  "bn": "মেট্রোয় স্বাগতম। {from} থেকে {to}। দরজা থেকে দূরে দাঁড়ান।",
+  "en": "Welcome aboard the metro. {from} to {to}. Please stand away from the doors."
+ },
+ "metro_next": {
+  "bn": "পরবর্তী স্টেশন {station}। দরজা বাঁদিকে খুলবে।",
+  "en": "Next station {station}. Doors will open on the left."
+ },
+ "metro_change": {
+  "bn": "{station}। এখানে লাইন বদলান।",
+  "en": "{station}. Change lines here."
+ },
+ "metro_arrive": {
+  "bn": "{station} পৌঁছে গেছেন। সাবধানে নামুন।",
+  "en": "Arrived at {station}. Mind the gap."
+ },
+ "horn": [
+  {
+   "bn": "পিঁপ পিঁপ! সরুন দাদা!",
+   "en": "Beep beep! Move aside, dada!"
+  },
+  {
+   "bn": "এই যে, রাস্তা ছাড়ুন!",
+   "en": "Hey, get off the road!"
+  },
+  {
+   "bn": "দেখে চলুন!",
+   "en": "Watch where you're going!"
+  }
+ ]
+}

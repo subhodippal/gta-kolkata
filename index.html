@@ -49,15 +49,24 @@
     <div id="topright">
       <div id="clock">১০:০০</div>
       <div id="phase"></div>
+      <div id="wxinfo"></div>
+      <div id="homeinfo"></div>
       <div id="visited"></div>
       <div class="hint" data-i18n="hud_hint"></div>
       <div class="hudbtns">
         <button id="voiceBtn" class="smallbtn" title="N">🔊</button>
         <button id="langBtn2" class="smallbtn" title="L" data-i18n="lang_switch">English</button>
       </div>
+      <div class="hudbtns wrap">
+        <button id="homeBtn" class="smallbtn" title="Y" data-i18n="btn_sethome"></button>
+        <button id="goHomeBtn" class="smallbtn" title="U" data-i18n="btn_gohome"></button>
+        <button id="routeBtn" class="smallbtn" title="B" data-i18n="btn_homeroute"></button>
+      </div>
+      <div class="hudbtns"><button id="liveBtn" class="smallbtn livebtn" title="I" data-i18n="btn_live"></button></div>
     </div>
     <div id="prompt" class="hidden"></div>
     <div id="toast" class="hidden"></div>
+    <div id="notifs"></div>
   </div>
 
   <!-- View (fly-over) mode -->
@@ -85,6 +94,7 @@
       <div id="pname"></div>
       <div id="pstreet"></div>
       <div id="pbody"></div>
+      <div class="pbtns" id="pextra"></div>
       <div class="pbtns">
         <button id="pgo" class="hidden" data-i18n="go_here"></button>
         <button id="pclose" data-i18n="close"></button>
@@ -180,6 +190,11 @@
         <tr><td>T</td><td data-i18n="time_key"></td></tr>
         <tr><td>V</td><td data-i18n="help_view"></td></tr>
         <tr><td>/</td><td data-i18n="help_search"></td></tr>
+        <tr><td>Y</td><td data-i18n="help_sethome"></td></tr>
+        <tr><td>U</td><td data-i18n="help_gohome"></td></tr>
+        <tr><td>B</td><td data-i18n="help_homeroute"></td></tr>
+        <tr><td>I</td><td data-i18n="help_live"></td></tr>
+        <tr><td>O</td><td data-i18n="help_wx"></td></tr>
         <tr><td>N</td><td data-i18n="help_sound"></td></tr>
         <tr><td>L</td><td data-i18n="help_lang"></td></tr>
         <tr><td>Esc</td><td data-i18n="help_esc"></td></tr>
@@ -199,6 +214,9 @@
       <button data-k="use" class="tb game">E<small data-i18n="tb_use"></small></button>
       <button data-k="map" class="tb">🗺<small data-i18n="tb_map"></small></button>
       <button data-k="view" class="tb">🦅<small data-i18n="tb_view"></small></button>
+      <button data-k="sethome" class="tb">🏠<small data-i18n="tb_home"></small></button>
+      <button data-k="gohome" class="tb">🏡<small data-i18n="tb_home"></small></button>
+      <button data-k="live" class="tb">🌦<small data-i18n="tb_weather"></small></button>
     </div>
   </div>
   <div id="rotate" class="hidden"><div>⟳<br /><span data-i18n="rotate"></span></div></div>

@@ -6,6 +6,22 @@ import { ambassadorGeometry } from './npc.js';
 import { RoadGraph } from './roadgraph.js';
 import { RK } from './world.js';
 import { Grid } from './geo.js';
+import { radialTexture } from './nightlights.js';
+
+// soft light cone on the road in front of a vehicle: bright at the bumper, fading with distance, soft at the sides
+let beamTex;
+function beamTexture() {
+  if (beamTex) return beamTex;
+  const w = 64, h = 128, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const c = cv.getContext('2d'), im = c.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const along = Math.pow(1 - y / h, 1.6), side = Math.exp(-Math.pow((x - w / 2) / (w * 0.27), 2));
+    const i = (y * w + x) * 4; im.data[i] = im.data[i + 1] = im.data[i + 2] = 255; im.data[i + 3] = Math.round(255 * along * side);
+  }
+  c.putImageData(im, 0, 0);
+  beamTex = new THREE.CanvasTexture(cv); beamTex.colorSpace = THREE.SRGBColorSpace;
+  return beamTex;
+}
 
 function colored(g, hex) {
   const c = new THREE.Color(hex), n = g.attributes.position.count, a = new Float32Array(n * 3);
@@ -66,6 +82,42 @@ export class Traffic {
     world.unloadHooks.push((tile) => this.removeTileTrams(tile));
     this.time = 0;
     this.hornCb = null;
+    this.buildLights();
+  }
+
+  // ------------------------------------------------------------ headlights, taillights and beams (night / storm)
+  buildLights() {
+    const n = this.all.length, col = new Float32Array(n * 12);
+    for (let i = 0; i < n; i++) for (let k = 0; k < 4; k++) col.set(k < 2 ? [1, 0.93, 0.74] : [1, 0.12, 0.06], (i * 4 + k) * 3);
+    const g = new THREE.BufferGeometry();
+    this.lightPos = new Float32Array(n * 12).fill(-1000);
+    g.setAttribute('position', new THREE.BufferAttribute(this.lightPos, 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    this.lightMat = new THREE.PointsMaterial({ map: radialTexture(), size: 2.2, sizeAttenuation: true, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+    this.lightPts = new THREE.Points(g, this.lightMat); this.lightPts.frustumCulled = false; this.lightPts.renderOrder = 3; this.lightPts.visible = false;
+    const bg = new THREE.PlaneGeometry(4.8, 15).rotateX(-Math.PI / 2).translate(0, 0, 7.5);
+    this.beamMat = new THREE.MeshBasicMaterial({ map: beamTexture(), color: 0xffe9b8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
+    this.beams = new THREE.InstancedMesh(bg, this.beamMat, n); this.beams.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.beams.frustumCulled = false; this.beams.visible = false; this.beams.renderOrder = 2;
+    this.scene.add(this.lightPts, this.beams);
+  }
+  /** level 0..1 from the day/night cycle and the weather */
+  setLights(level) {
+    this.lightMat.opacity = Math.min(1, level * 1.2); this.beamMat.opacity = level * 0.7;
+    this.lightPts.visible = this.beams.visible = level > 0.03;
+  }
+  updateLights() {
+    if (!this.lightPts.visible) return;
+    const P = this.lightPos, m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3(), hide = new THREE.Matrix4().makeScale(0, 0, 0);
+    this.all.forEach((v, i) => {
+      if (!v.active) { P.fill(-1000, i * 12, i * 12 + 12); this.beams.setMatrixAt(i, hide); return; }
+      const sx = Math.sin(v.yaw), sz = Math.cos(v.yaw), rx = sz, rz = -sx, bus = v.type === 'bus';
+      const f = v.length / 2 - 0.12, hw = bus ? 0.95 : 0.68, hy = v.y + (bus ? 0.85 : 0.62);
+      const set = (k, d, side) => { const o = i * 12 + k * 3; P[o] = v.x + sx * d + rx * side; P[o + 1] = hy; P[o + 2] = v.z + sz * d + rz * side; };
+      set(0, f, hw); set(1, f, -hw); set(2, -f, hw); set(3, -f, -hw);
+      q.setFromAxisAngle(up, v.yaw); m.compose(p.set(v.x + sx * (f - 0.2), v.y + 0.3, v.z + sz * (f - 0.2)), q, one); this.beams.setMatrixAt(i, m);
+    });
+    this.lightPts.geometry.attributes.position.needsUpdate = true; this.beams.instanceMatrix.needsUpdate = true;
   }
 
   makePool(geom, n, type, length) {
@@ -193,6 +245,7 @@ export class Traffic {
     }
     this.cars.mesh.instanceMatrix.needsUpdate = true; this.buses.mesh.instanceMatrix.needsUpdate = true;
     this.updateTrams(dt);
+    this.updateLights();
   }
 
   // keep the player out of vehicles

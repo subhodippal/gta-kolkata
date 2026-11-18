@@ -6,9 +6,9 @@ import * as THREE from 'three';
 
 // keyframes by hour: zenith, horizon, fog, sun colour, sun intensity, hemi sky, hemi ground, hemi intensity, exposure, night(0..1)
 const K = [
-  [0, '#060a18', '#141b30', '#10162a', '#9fb4ff', 0.30, '#3a4a78', '#141820', 0.35, 1.25, 1],
-  [2, '#060a18', '#131a2e', '#0f1528', '#9fb4ff', 0.30, '#3a4a78', '#141820', 0.35, 1.25, 1],
-  [4, '#0b1430', '#28304e', '#1e2540', '#a9b8ff', 0.25, '#44507a', '#1a1c22', 0.40, 1.2, 1],
+  [0, '#070c1c', '#18203a', '#131a30', '#9fb4ff', 0.95, '#7288c8', '#353e5a', 1.35, 1.5, 1],
+  [2, '#070c1c', '#171f38', '#121930', '#9fb4ff', 0.95, '#7288c8', '#353e5a', 1.35, 1.5, 1],
+  [4, '#0d1634', '#2c3556', '#212944', '#a9b8ff', 0.9, '#7084bc', '#313a52', 1.3, 1.45, 1],
   [5, '#2a3a6a', '#d88a64', '#8a7480', '#ff9a60', 0.6, '#7a7aa0', '#3a3028', 0.6, 1.1, 0.6],
   [6, '#4a78b8', '#ffb070', '#e0a888', '#ffb27a', 1.4, '#a8b4cc', '#5a4a38', 0.9, 1.05, 0.15],
   [8, '#4f86c8', '#e8d8bc', '#dccdb0', '#ffe2b8', 2.1, '#cfdcec', '#7a6a50', 1.15, 1.05, 0],
@@ -18,9 +18,9 @@ const K = [
   [16, '#5583bf', '#ecc898', '#dcc2a0', '#ffd49a', 2.0, '#d4d8e0', '#7e6a4e', 1.1, 1.05, 0],
   [17.5, '#46639c', '#f2a070', '#d89c7c', '#ff8040', 1.3, '#b09aa8', '#5a4030', 0.85, 1.1, 0.2],
   [18.5, '#1e2a58', '#a8506a', '#5a4058', '#ff6a50', 0.45, '#6a6090', '#2a2026', 0.55, 1.15, 0.75],
-  [20, '#0a1024', '#1e2440', '#161c32', '#9fb4ff', 0.30, '#3e4c7a', '#161820', 0.4, 1.2, 1],
-  [22, '#070b1a', '#161c32', '#11172b', '#9fb4ff', 0.30, '#3a4a78', '#141820', 0.35, 1.25, 1],
-  [24, '#060a18', '#141b30', '#10162a', '#9fb4ff', 0.30, '#3a4a78', '#141820', 0.35, 1.25, 1],
+  [20, '#0b1226', '#222a48', '#19213a', '#9fb4ff', 0.9, '#6f84c0', '#303850', 1.3, 1.45, 1],
+  [22, '#070c1c', '#18203a', '#131a30', '#9fb4ff', 0.95, '#7288c8', '#353e5a', 1.35, 1.5, 1],
+  [24, '#070c1c', '#18203a', '#131a30', '#9fb4ff', 0.95, '#7288c8', '#353e5a', 1.35, 1.5, 1],
 ];
 const PHASES = [[4, 'ph_night'], [5.5, 'ph_dawn'], [7, 'ph_sunrise'], [10, 'ph_morning'], [14, 'ph_noon'], [16, 'ph_afternoon'],
   [17.4, 'ph_evening'], [18.6, 'ph_sunset'], [20, 'ph_dusk'], [24, 'ph_night']];
@@ -30,8 +30,9 @@ const KC = K.map(k => ({ h: k[0], zen: C(k[1]), hor: C(k[2]), fog: C(k[3]), sun:
 export function phaseOf(hour) { for (const [h, id] of PHASES) if (hour < h) return id; return 'ph_night'; }
 
 export class DayNight {
-  constructor({ scene, renderer, hemi, sun, world, low }) {
-    Object.assign(this, { scene, renderer, hemi, sun, world, low });
+  constructor({ scene, renderer, hemi, sun, world, low, weather }) {
+    Object.assign(this, { scene, renderer, hemi, sun, world, low, weather });
+    this.level = 0; this.grey = C('#888888');
     this.sunDir = new THREE.Vector3(); this.moonDir = new THREE.Vector3(); this.lightDir = new THREE.Vector3();
     this.cur = { zen: C('#000'), hor: C('#000'), fog: C('#000'), sun: C('#000'), hs: C('#000'), hg: C('#000') };
     this.buildSky();
@@ -46,9 +47,14 @@ export class DayNight {
       uniforms: {
         sunDir: { value: this.sunDir }, moonDir: { value: this.moonDir }, zen: { value: this.cur.zen }, hor: { value: this.cur.hor },
         sunCol: { value: new THREE.Color() }, stars: { value: 0 }, sunVis: { value: 1 }, time: { value: 0 },
+        cloud: { value: 0.1 }, cloudDark: { value: 0 }, flash: { value: 0 }, daylight: { value: 1 },
       },
       vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); gl_Position.z = gl_Position.w; }',
-      fragmentShader: `varying vec3 vP; uniform vec3 sunDir, moonDir, zen, hor, sunCol; uniform float stars, sunVis, time;
+      fragmentShader: `varying vec3 vP; uniform vec3 sunDir, moonDir, zen, hor, sunCol; uniform float stars, sunVis, time, cloud, cloudDark, flash, daylight;
+        float h2(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(h2(i), h2(i + vec2(1.0, 0.0)), f.x), mix(h2(i + vec2(0.0, 1.0)), h2(i + vec2(1.0, 1.0)), f.x), f.y); }
+        float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * vn(p); p *= 2.03; a *= 0.5; } return v; }
         float hash(vec3 p){ p = fract(p*0.3183099+0.1); p *= 17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
         void main(){
           vec3 d = normalize(vP); float h = max(d.y, 0.0);
@@ -70,6 +76,17 @@ export class DayNight {
             if (r > 0.985) { vec3 f = fract(q) - 0.5; float st = smoothstep(0.12, 0.0, length(f));
               float tw = 0.7 + 0.3 * sin(time * (2.0 + r * 5.0) + r * 40.0);
               c += vec3(0.9, 0.93, 1.0) * st * tw * stars * smoothstep(0.0, 0.15, d.y) * (1.0 - disc); }
+          }
+          // clouds: a drifting noise layer projected on the dome; denser, darker and greyer as the weather turns
+          if (d.y > 0.0) {
+            vec2 uv = d.xz / (d.y + 0.2) * 0.9 + vec2(time * 0.012, time * 0.006);
+            float n = fbm(uv * 1.5);
+            float thr = mix(0.78, 0.28, cloud);
+            float dens = smoothstep(thr, thr + 0.26, n) * smoothstep(0.0, 0.1, d.y);
+            vec3 cc = mix(vec3(1.0, 0.99, 0.96), vec3(0.36, 0.38, 0.44), cloudDark) * (0.1 + 0.9 * daylight) + vec3(0.03, 0.04, 0.07);
+            cc += sunCol * pow(s, 3.0) * 0.5 * low * (1.0 - cloudDark * 0.6);
+            c = mix(c, cc, dens * clamp(cloud * 1.15, 0.0, 1.0));
+            c += vec3(0.65, 0.72, 0.95) * flash * (0.25 + 0.75 * dens);
           }
           if (d.y < 0.0) c = hor;
           gl_FragColor = vec4(c, 1.0); }`,
@@ -104,6 +121,12 @@ export class DayNight {
     const L = (k) => this.cur[k].copy(a[k]).lerp(b[k], f), n = (k) => a[k] + (b[k] - a[k]) * f;
     L('zen'); L('hor'); L('fog'); L('sun'); L('hs'); L('hg');
     const night = n('night');
+    // weather: grey, darker sky and a dimmer sun under cloud / rain / storm
+    const W = this.weather, oc = W ? W.overcast : 0, dk = W ? W.dark : 0, fl = W ? W.flash : 0;
+    for (const k of ['zen', 'hor', 'fog', 'hs']) {
+      const c = this.cur[k], l = 0.3 * c.r + 0.59 * c.g + 0.11 * c.b;
+      c.lerp(this.grey.setRGB(l * 0.95, l * 0.97, l * 1.02), oc * 0.8).multiplyScalar(1 - 0.5 * dk);
+    }
     // sun path: east (+x) at 06:00, high in the south (+z) at noon, west at 18:00
     const ang = (hour - 6) / 12 * Math.PI;
     this.sunDir.set(Math.cos(ang), Math.sin(ang) * 0.92, Math.sin(ang) * 0.39).normalize();
@@ -114,19 +137,23 @@ export class DayNight {
     const useMoon = this.sunDir.y < 0.02;
     this.lightDir.copy(useMoon ? this.moonDir : this.sunDir);
     if (this.lightDir.y < 0.12) this.lightDir.y = 0.12; this.lightDir.normalize();
-    this.sun.color.copy(this.cur.sun); this.sun.intensity = n('si');
-    this.hemi.color.copy(this.cur.hs); this.hemi.groundColor.copy(this.cur.hg); this.hemi.intensity = n('hi');
-    this.renderer.toneMappingExposure = n('ex');
+    this.sun.color.copy(this.cur.sun); this.sun.intensity = n('si') * (1 - 0.75 * oc) + fl * 1.5;
+    this.hemi.color.copy(this.cur.hs); this.hemi.groundColor.copy(this.cur.hg); this.hemi.intensity = n('hi') * (1 - 0.15 * oc) + fl * 2.2;
+    this.renderer.toneMappingExposure = n('ex') * (1 + 0.12 * dk);
     this.scene.fog.color.copy(this.cur.fog); this.scene.background.copy(this.cur.fog);
     // sky uniforms
     const U = this.skyMat.uniforms;
     U.sunCol.value.copy(this.cur.sun); U.stars.value = night; U.sunVis.value = THREE.MathUtils.clamp((this.sunDir.y + 0.04) * 12, 0, 1); U.time.value = elapsed;
+    U.cloud.value = W ? W.cloud : 0.1; U.cloudDark.value = Math.min(1, oc * 1.1 + dk * 0.5); U.flash.value = fl; U.daylight.value = 1 - night;
     this.sky.position.copy(camera.position);
     // night lights
-    const M = this.world.mat, lights = THREE.MathUtils.smoothstep(night, 0.1, 0.7);
+    const M = this.world.mat, lights = Math.max(THREE.MathUtils.smoothstep(night, 0.1, 0.7), dk * 0.85);
+    this.level = lights;
     M.walls.emissive.setScalar(0.85 * lights);
     M.shops.emissive.setScalar(0.55 * lights);
     M.lampHead.emissive.copy(this.lampBase).lerp(new THREE.Color(0xffd27a), lights).multiplyScalar(1 + lights * 1.5);
+    M.lampGlow.opacity = lights; M.lampPool.opacity = lights * 0.55;
+    M.road.color.setScalar(1 - 0.32 * (W ? W.rain : 0));          // wet asphalt is darker
     if (this.world.waterMat) this.world.waterMat.color.setRGB(0.37, 0.46, 0.39).multiplyScalar(1 - night * 0.6);
     this.night = night;
     return this.lightDir;

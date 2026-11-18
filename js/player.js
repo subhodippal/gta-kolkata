@@ -1,12 +1,13 @@
 // The player character: walk, run, jump, punch, kick
 import * as THREE from 'three';
-import { makeHuman, animateHuman } from './human.js';
+import { makePlayerHuman, animateHuman } from './human.js';
 
 export class Player {
   constructor(scene, world) {
     this.world = world;
     // red-and-white checked style shirt, jeans: our hero from Kolkata
-    this.h = makeHuman({ skin: 0x8a5636, shirt: 0xc62828, pants: 0x1f3550, hair: 0x120d0a, shoes: 0xeeeeee });
+    this.h = makePlayerHuman({ skin: 0x8a5636, shirt: 0xc62828, pants: 0x1f3550, hair: 0x120d0a });
+    this.umbrella = false;                    // set by main.js when it rains
     scene.add(this.h.root);
     this.pos = new THREE.Vector3();
     this.vel = new THREE.Vector3();
@@ -68,7 +69,7 @@ export class Player {
 
     this.h.root.position.copy(this.pos);
     this.h.root.rotation.y = this.yaw;
-    animateHuman(this.h, { speed: this.speed, air: !this.onGround, vy: this.vel.y, attack: this.attack, dt });
+    animateHuman(this.h, { speed: this.speed, air: !this.onGround, vy: this.vel.y, attack: this.attack, umbrella: this.umbrella && !this.attack, dt });
     return hitRiver;
   }
 

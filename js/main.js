@@ -15,10 +15,13 @@ import { Search } from './search.js';
 import { Nav } from './nav.js';
 import { MapUI } from './mapui.js';
 import { Player } from './player.js';
+import { Weather, realMinutes } from './weather.js';
+import { Home } from './home.js';
+import { NightLights } from './nightlights.js';
 import { Controls } from './controls.js';
 import { HUD } from './hud.js';
 import { ViewMode } from './viewmode.js';
-import { tn, loadI18n, t, line, landmarkLine, setLang, getLang, onLang, speak, setVoice, voiceEnabled, hasVoice } from './i18n.js';
+import { tn, loadI18n, t, num, line, landmarkLine, setLang, getLang, onLang, speak, setVoice, voiceEnabled, hasVoice } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const progress = (f, msg) => { $('loadbar').style.width = Math.round(f * 100) + '%'; if (msg) $('loadmsg').textContent = msg; };
@@ -50,7 +53,8 @@ Object.assign(sun.shadow.camera, { left: -70, right: 70, top: 70, bottom: -70, n
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.04;
 scene.add(sun, sun.target);
 
-let daynight, trains, world, landmarks, pois, people, player, hud, view, details, traffic, metro, nav, mapui, boats;
+let daynight, trains, world, landmarks, pois, people, player, hud, view, details, traffic, metro, nav, mapui, boats, weather, home, nightLights;
+let liveTime = true, spawnNote = null, homeArmed = false, stormNag = 0;
 let maxDist = 22, camYaw = Math.PI, camPitch = 0.28, camDist = 7.5, camDistCur = 7.5;
 const camTarget = new THREE.Vector3();
 let started = false;
@@ -80,7 +84,20 @@ function resolveNames(data) {
   }
 }
 
+// the player's real GPS position (asks the browser; null if refused, unavailable or slow)
+function locate() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    const timer = setTimeout(() => resolve(null), 7000);
+    navigator.geolocation.getCurrentPosition(
+      (p) => { clearTimeout(timer); resolve({ lat: p.coords.latitude, lon: p.coords.longitude }); },
+      () => { clearTimeout(timer); resolve(null); },
+      { enableHighAccuracy: true, timeout: 6500, maximumAge: 60000 });
+  });
+}
+
 async function init() {
+  const geoP = locate();
   await loadI18n();
   window.__strings = (await import('./i18n.js')).strings();
   setupLangButtons();
@@ -112,19 +129,33 @@ async function init() {
   boats = new Boats(scene, world, mobile ? { big: 4, small: 12, ferries: 6 } : {});
   people = new People(scene, world, mobile ? 18 : 42);
   player = new Player(scene, world);
-  const [sx, sz] = world.findSafeSpot(40, 214, false); // Esplanade, next to Shaheed Minar
+  // spawn at the player's real location when it is inside the map, otherwise at Esplanade next to Shaheed Minar
+  let [sx, sz] = world.findSafeSpot(40, 214, false), real = false;
+  const loc = await geoP;
+  if (loc) {
+    const m = world.d.meta, b = world.bounds, gx = (loc.lon - m.lon0) * m.kx, gz = -(loc.lat - m.lat0) * m.kz;
+    if (gx > b.x0 + 30 && gx < b.x1 - 30 && gz > b.z0 + 30 && gz < b.z1 - 30) {
+      progress(0.85, t('load_map'));
+      await world.ensureAround(gx, gz, 700);
+      [sx, sz] = world.findSafeSpot(gx, gz, false); real = true; spawnNote = 'spawn_real';
+    } else spawnNote = 'spawn_outside';
+  }
   player.place(sx, sz);
-  camYaw = Math.atan2(sx - 26.9, sz - 234.7); // look towards the Minar
+  camYaw = real ? Math.PI : Math.atan2(sx - 26.9, sz - 234.7); // look towards the Minar
+  home = new Home(scene, world);
+  homeArmed = !(home.isSet && home.dist(sx, sz) < 40);
   hud = new HUD(world, pois, lms);
+  hud.home = home;
+  hud.gameMinutes = realMinutes(); hud.timeScale = 1 / 60;       // real Kolkata time, running at real speed
   metro = new Metro(scene, world, data, hud);
   hud.metro = metro;
   nav = new Nav(scene, world, hud);
   const search = new Search({ world, pois, landmarks: lms, metro, busStops: details.busStops });
-  hud.onTravel = async (x, z, name) => {
+  hud.onTravel = async (x, z, name, exact) => {
     if (view.active) toggleView(false);
     hud.toast('⏳ ' + t('load_map'), 2);
     await world.ensureAround(x, z, 400);
-    const [tx, tz] = world.findSafeSpot(x, z); player.place(tx, tz);
+    const [tx, tz] = exact ? [x, z] : world.findSafeSpot(x, z); player.place(tx, tz);
     updateCamera(0.016, true);
     hud.say(line('travel', { place: name || world.streetAt(tx, tz) || world.districtAt(tx, tz) }), 3, '📍 ');
   };
@@ -138,7 +169,11 @@ async function init() {
   hud.mapui = mapui;
   view = new ViewMode({ camera, canvas, scene, world, pois, landmarks: lms, hud, sun, controls, low });
   view.onExit = () => toggleView(false);
-  daynight = new DayNight({ scene, renderer, hemi, sun, world, low });
+  weather = new Weather(scene, { low });
+  weather.onChange = onWeatherChange;
+  nightLights = new NightLights(scene, world, { low });
+  daynight = new DayNight({ scene, renderer, hemi, sun, world, low, weather });
+  setupHomeWeatherButtons();
   const sat = new SatelliteGround(world);
   const satChk = document.getElementById('satChk'); satChk.checked = satEnabled();
   satChk.onchange = (e) => sat.setEnabled(e.target.checked);
@@ -146,9 +181,90 @@ async function init() {
   progress(1, t('load_ready'));
   updateCamera(0.016, true);
   renderer.compile(scene, camera);
+  updateWxText();
   $('startBtn').classList.remove('hidden'); $('exploreBtn').classList.remove('hidden');
   $('startBtn').onclick = () => start(false);
   $('exploreBtn').onclick = () => start(true);
+}
+
+// ---------------------------------------------------------------- home & live weather
+const wxLabel = () => t(weather.state === 'clear' && daynight && daynight.night > 0.5 ? 'wx_clear_night' : 'wx_' + weather.state);
+const atHome = () => home.isSet && home.dist(player.pos.x, player.pos.z) < 12;
+const nearestNote = () => (home.isSet ? t('storm_still', { d: num(Math.round(home.dist(player.pos.x, player.pos.z))) }) : t('storm_set_home'));
+function updateWxText() { hud.wxText = wxLabel() + (weather.live && weather.info ? ' · ' + num(weather.info.temp) + '°C' : ''); }
+
+function onWeatherChange(state, prev) {
+  if (!started) return;
+  if (state === 'storm') {
+    if (atHome()) hud.notify('⛈', t('storm_title'), t('storm_home_body'), { voice: line('storm_home') });
+    else hud.notify('⛈', t('storm_title'), t('storm_out_body') + '<br>' + nearestNote(), { time: 10, voice: line('storm_start') });
+    stormNag = 60;
+  } else if (state === 'rain' && prev !== 'storm') hud.notify('🌧', t('rain_title'), t('rain_body'), { voice: line('rain_start') });
+  updateWxText();
+}
+
+function setHome() {
+  if (view.active || hud.open) return;
+  home.set(player.pos.x, player.pos.z, player.yaw); homeArmed = false;
+  hud.askNotifyPermission();
+  hud.notify('🏠', t('home_set_title'), t('home_set_body'), { voice: line('home_set') });
+}
+function goHome() {
+  if (!home.isSet) { hud.notify('🏠', t('home'), t('home_none')); return; }
+  const d = home.pos; hud.onTravel(d.x, d.z, t('home'), true).then(() => { player.yaw = home.yaw; camYaw = home.yaw + Math.PI; updateCamera(0.016, true); });
+}
+function homeRoute() {
+  if (!home.isSet) { hud.notify('🏠', t('home'), t('home_none')); return; }
+  if (view.active) toggleView(false);
+  nav.set(home.pos.x, home.pos.z, t('home'), player.pos);
+}
+function enterHome() {
+  const h = Math.floor(hud.gameMinutes / 60) % 24, m = Math.floor(hud.gameMinutes) % 60;
+  const sleep = () => { const cur = hud.gameMinutes % 1440; hud.gameMinutes += cur < 360 ? 360 - cur : 1440 - cur + 360; hud.say(t(phaseOf((hud.gameMinutes / 60) % 24)), 2.5, '🌅 '); };
+  hud.panel({
+    kind: t('home_panel_kind'), name: t('home_panel_name'), street: world.streetAt(player.pos.x, player.pos.z) || world.districtAt(player.pos.x, player.pos.z),
+    body: t('home_panel_body', { time: num(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')), phase: t(phaseOf(h + m / 60)), wx: wxLabel() }),
+    actions: [
+      { label: t('home_sleep'), fn: sleep },
+      { label: t('home_wait'), fn: () => { hud.gameMinutes += 120; hud.say(t(phaseOf((hud.gameMinutes / 60) % 24)), 2, '🕑 '); } },
+      { label: t('home_weather'), fn: () => syncLive(true) },
+    ],
+  });
+}
+
+/** fetch the real weather + clock of Kolkata and make the game match it */
+async function syncLive(user) {
+  if (user) { hud.askNotifyPermission(); hud.toast('⏳ ' + t('btn_live'), 2); }
+  try {
+    const info = await weather.fetchLive();
+    hud.gameMinutes = info.minutes; hud.timeScale = 1 / 60; liveTime = true;
+    weather.applyLive(info); updateWxText();
+    const ph = phaseOf(info.minutes / 60), clock = num(String(Math.floor(info.minutes / 60)).padStart(2, '0') + ':' + String(info.minutes % 60).padStart(2, '0'));
+    hud.notify(info.isDay ? '☀️' : '🌙', t('wx_live_title') + ' · ' + clock, t('wx_live_body', { temp: num(info.temp), feels: num(info.feels), wx: wxLabel(), phase: t(ph), hum: num(info.humidity), wind: num(info.wind) }), { time: 10 });
+  } catch (e) {
+    console.warn('live weather', e);
+    hud.gameMinutes = realMinutes(); hud.timeScale = 1 / 60; liveTime = true; weather.live = false; weather.auto = true;
+    if (user) hud.notify('⚠️', t('wx_live_title'), t('wx_live_fail'));
+  }
+}
+
+function setupHomeWeatherButtons() {
+  $('homeBtn').onclick = setHome; $('goHomeBtn').onclick = goHome; $('routeBtn').onclick = homeRoute;
+  $('liveBtn').onclick = () => { weather.unlock(); syncLive(true); };
+}
+
+// storm / arrival alerts, umbrella
+function alerts(dt) {
+  const p = player.pos, d = home.dist(p.x, p.z);
+  if (d > 40) homeArmed = true;
+  if (homeArmed && d < 9) { homeArmed = false; hud.notify('🏠', t('home_reached_title'), t('home_reached_body'), { voice: line('home_reached') }); }
+  const safe = d < 12;
+  weather.indoors = safe;
+  player.umbrella = weather.rain > 0.35 && !safe;
+  if (weather.state === 'storm') {
+    stormNag -= dt;
+    if (stormNag <= 0) { stormNag = 60; if (!safe) hud.notify('⚡', t('storm_title'), t('storm_out_body') + '<br>' + nearestNote(), { time: 9 }); }
+  }
 }
 
 function setupLangButtons() {
@@ -208,6 +324,11 @@ function start(explore) {
     hud.say(line('welcome'), 7);
   }
   if (voiceEnabled() && !hasVoice()) setTimeout(() => hud.toast(t('voice_missing'), 4), 7000);
+  // real environment: unlock audio (rain / thunder), then match the real Kolkata weather and time
+  weather.unlock();
+  if (spawnNote) hud.notify('📍', t(spawnNote), '', { time: 6 });
+  syncLive(false);
+  setInterval(() => { if (weather.live && liveTime) syncLive(false); }, 10 * 60 * 1000);
 }
 
 function checkOrientation() {
@@ -219,12 +340,13 @@ const ray = new THREE.Vector3();
 function updateCamera(dt, snap = false) {
   const lk = controls.look;
   camYaw -= lk.dx * 0.0032; camPitch += lk.dy * 0.0026;
-  camPitch = Math.max(-0.35, Math.min(1.25, camPitch));
+  camPitch = Math.max(-1.3, Math.min(1.25, camPitch));   // below ~0.1 the camera stops orbiting and tilts up to look at the sky
   camDist = Math.max(2.5, Math.min(maxDist, camDist + controls.zoom * 0.9));
   const tgt = player.pos.clone(); tgt.y += 1.55;
   if (snap) camTarget.copy(tgt); else camTarget.lerp(tgt, Math.min(1, dt * 12));
   // keep camera out of buildings
-  ray.set(Math.sin(camYaw) * Math.cos(camPitch), Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
+  const pe = Math.max(camPitch, 0.1), lookUp = Math.max(0, 0.1 - camPitch);
+  ray.set(Math.sin(camYaw) * Math.cos(pe), Math.sin(pe), Math.cos(camYaw) * Math.cos(pe));
   let want = camDist;
   for (let d = 0.6; d <= camDist; d += 0.5) {
     const x = camTarget.x + ray.x * d, y = camTarget.y + ray.y * d, z = camTarget.z + ray.z * d;
@@ -235,7 +357,10 @@ function updateCamera(dt, snap = false) {
   camera.position.copy(camTarget).addScaledVector(ray, camDistCur);
   const gy = world.groundAt(camera.position.x, camera.position.z, camera.position.y) + 0.4;
   if (camera.position.y < gy) camera.position.y = gy;
-  camera.lookAt(camTarget);
+  if (lookUp > 0) {                                  // look up at the sky: clouds, birds, rain, lightning
+    const c = Math.cos(lookUp), s = Math.sin(lookUp);
+    camera.lookAt(camera.position.x - Math.sin(camYaw) * c * 40, camera.position.y + s * 40, camera.position.z - Math.cos(camYaw) * c * 40);
+  } else camera.lookAt(camTarget);
 }
 
 // ---------------------------------------------------------------- interaction
@@ -246,6 +371,7 @@ function findInteractable() {
   if (me) return { type: 'metro', e: me, label: t('prompt_metro', { name: tn(metro.stations[me.si].ni) }) };
   const n = people.nearest(p.x, p.z, 2.2);
   if (n) return { type: 'npc', n, label: t('prompt_talk') };
+  if (home.isSet && home.dist(p.x, p.z) < 3.4) return { type: 'home', label: '<b>[E]</b> ' + t('home_door') };
   const poi = pois.nearest(p.x, p.z, 4.5);
   if (poi) return { type: 'poi', poi, label: t('prompt_enter', { name: escapeHtml(tn(poi.ni)) }) };
   for (const l of hud.landmarks) {
@@ -262,6 +388,7 @@ const visitedLandmarks = new Set();
 function interact() {
   if (!nearThing) return;
   if (nearThing.type === 'metro') { metro.openPanel(nearThing.e.si); return; }
+  if (nearThing.type === 'home') { enterHome(); return; }
   if (nearThing.type === 'npc') { hud.say('“' + people.talk(nearThing.n) + '”', 3, '🗣 '); }
   else if (nearThing.type === 'poi') { hud.panel(pois.visit(nearThing.poi)); }
   else if (nearThing.type === 'landmark') {
@@ -286,7 +413,12 @@ function frame() {
     if (controls.take('search')) { hud.close(); mapui.open(viewing ? view.target : player.pos, true); }
     if (controls.take('view')) { hud.close(); toggleView(!view.active); }
     if (controls.take('voice')) toggleVoice();
-    if (controls.take('time')) { hud.gameMinutes = (Math.floor(hud.gameMinutes / 120) + 1) * 120; hud.say(t(phaseOf((hud.gameMinutes / 60) % 24)), 2, '🕑 '); }
+    if (controls.take('time')) { hud.timeScale = 1; liveTime = false; weather.live = false; weather.auto = true; hud.gameMinutes = (Math.floor(hud.gameMinutes / 120) + 1) * 120; hud.say(t(phaseOf((hud.gameMinutes / 60) % 24)), 2, '🕑 '); }
+    if (controls.take('sethome')) setHome();
+    if (controls.take('gohome')) goHome();
+    if (controls.take('homeroute')) homeRoute();
+    if (controls.take('live')) { weather.unlock(); syncLive(true); }
+    if (controls.take('wx')) { weather.unlock(); weather.cycle(); updateWxText(); hud.toast(t('wx_manual', { wx: wxLabel() }), 2.5); }
     if (controls.take('lang')) { setLang(getLang() === 'bn' ? 'en' : 'bn'); hud.say(line('lang_changed'), 2.5, '🌐 '); }
     if (controls.take('esc') && hud.open) hud.close();
     if (metro.riding) {
@@ -318,8 +450,11 @@ function frame() {
     details.update(traffic.time);
     metro.update(dt);
     mapui.update();
+    weather.update(dt, camera, focus, elapsed, daynight ? 1 - daynight.night : 1);
+    alerts(dt);
     pois.update(dt, focus, camera);
     landmarks.update(elapsed);
+    if (elapsed % 1 < dt) updateWxText();
     if (!viewing && elapsed % 0.2 < dt) { nearThing = findInteractable(); hud.prompt(hud.open ? null : nearThing && nearThing.label); }
     hud.update(dt, focus, viewing ? view.yaw : camYaw, viewing ? view.yaw + Math.PI : player.yaw);
   }
@@ -329,13 +464,18 @@ function frame() {
   const sd = viewing ? view.shadowSize * 2 + 250 : 250;
   const lightDir = daynight ? daynight.update(hud ? hud.gameMinutes : 600, focus, camera, elapsed) : SUN_DIR;
   sun.position.copy(focus).addScaledVector(lightDir, sd); sun.target.position.copy(focus);
+  if (daynight && started) {
+    nightLights.update(dt, viewing ? 0 : daynight.level, player.pos, home.porch ? [{ x: home.porch.x, y: home.porch.y, z: home.porch.z }] : []);
+    traffic.setLights(daynight.level);
+    home.update(daynight.level, elapsed);
+  }
   world.waterMat.normalMap.offset.set(elapsed * 0.004, elapsed * 0.01);
   renderer.render(scene, camera);
   controls.endFrame();
 }
 
 // dev helper: __dbg(x, z, yaw, pitch, dist) teleports & frames the camera
-window.__scene = scene; window.__game = () => ({ landmarks, trains, daynight, hud, player, world, people, controls, traffic, metro, nav, view, mapui });
+window.__scene = scene; window.__game = () => ({ weather, home, nightLights, landmarks, trains, daynight, hud, player, world, people, controls, traffic, metro, nav, view, mapui });
 window.__metroTest = () => { const e = metro.entrances.find(e => metro.stations[e.si].n === 'Esplanade'); player.place(e.x + 1, e.z + 1); metro.openPanel(e.si); };
 window.__dbg = (x, z, yaw, pitch, dist) => {
   if (dist > 22) maxDist = dist;

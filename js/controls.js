@@ -17,7 +17,7 @@ export class Controls {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (e.repeat) { if (['Space'].includes(e.code)) e.preventDefault(); return; }
       this.keys.add(e.code);
-      const map = { Space: 'jump', KeyJ: 'punch', KeyK: 'kick', KeyE: 'use', KeyM: 'map', KeyH: 'help', Escape: 'esc', KeyF: 'use', KeyV: 'view', KeyN: 'voice', KeyL: 'lang', Slash: 'search', KeyT: 'time' };
+      const map = { Space: 'jump', KeyJ: 'punch', KeyK: 'kick', KeyE: 'use', KeyM: 'map', KeyH: 'help', Escape: 'esc', KeyF: 'use', KeyV: 'view', KeyN: 'voice', KeyL: 'lang', Slash: 'search', KeyT: 'time', KeyY: 'sethome', KeyU: 'gohome', KeyB: 'homeroute', KeyI: 'live', KeyO: 'wx' };
       if (map[e.code]) this.pressed.add(map[e.code]);
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
     });

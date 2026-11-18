@@ -13,6 +13,8 @@ export class HUD {
     this.t = 0; this.toastT = 0;
     this.open = null; // 'panel' | 'map' | 'help'
     this.gameMinutes = 10 * 60;
+    this.timeScale = 1;       // game minutes per real second (1 = fast day, 1/60 = real Kolkata time)
+    this.home = null;         // Home (js/home.js), drawn on the minimap
     onLang(() => { this.lastPhase = null; });
     $('pclose').onclick = () => this.close();
     $('hclose').onclick = () => this.close();
@@ -24,7 +26,7 @@ export class HUD {
 
   update(dt, focus, camYaw, facing) {
     this.t += dt;
-    this.gameMinutes += dt; // 1 real second = 1 game minute
+    this.gameMinutes += dt * this.timeScale; // by default 1 real second = 1 game minute
     if (this.t % 0.3 < dt) {
       $('district').textContent = this.world.districtAt(focus.x, focus.z);
       $('street').textContent = this.world.streetAt(focus.x, focus.z) || '';
@@ -32,6 +34,9 @@ export class HUD {
       const ph = phaseOf(m / 60); if (ph !== this.lastPhase) { this.lastPhase = ph; $('phase').textContent = ['ph_sunrise', 'ph_sunset'].includes(ph) ? (ph === 'ph_sunrise' ? '🌅 ' : '🌇 ') + t(ph) : ((m / 60 >= 19 || m / 60 < 5) ? '🌙 ' : '☀️ ') + t(ph); }
       $('clock').textContent = num(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
       $('visited').textContent = t('visited', { n: num(this.pois.visited.size) });
+      const hm = this.home && this.home.pos;
+      $('homeinfo').textContent = hm ? t('home_dist', { d: num(Math.round(Math.hypot(hm.x - focus.x, hm.z - focus.z))) }) : '';
+      $('wxinfo').textContent = this.wxText || '';
     }
     if (this.toastT > 0 && (this.toastT -= dt) <= 0) $('toast').classList.add('hidden');
     this.drawMinimap(focus, camYaw, facing);
@@ -67,6 +72,11 @@ export class HUD {
     }
     for (const p of this.pois.grid.queryRadius(fx, fz, R)) { c.fillStyle = (KIND_STYLE[p.k] || KIND_STYLE.shop).col; c.beginPath(); c.arc(p.x, p.z, 3.5, 0, 7); c.fill(); }
     for (const l of this.landmarks) { c.fillStyle = '#ffcf3f'; c.strokeStyle = '#000'; c.lineWidth = 1.5; c.beginPath(); c.arc(l.x, l.z, 7, 0, 7); c.fill(); c.stroke(); }
+    const hm = this.home && this.home.pos;
+    if (hm && Math.abs(hm.x - fx) < R && Math.abs(hm.z - fz) < R) {
+      c.fillStyle = '#1fbf7a'; c.strokeStyle = '#fff'; c.lineWidth = 2.5; c.beginPath(); c.arc(hm.x, hm.z, 10, 0, 7); c.fill(); c.stroke();
+      c.save(); c.translate(hm.x, hm.z); c.rotate(-camYaw); c.font = '13px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🏠', 0, 1); c.restore();
+    }
     if (this.routePts) {
       const rp = this.routePts; c.strokeStyle = '#b388ff'; c.lineWidth = 5; c.lineJoin = 'round'; c.beginPath();
       for (let i = 0; i < rp.length; i += 3) i ? c.lineTo(rp[i], rp[i + 2]) : c.moveTo(rp[i], rp[i + 2]);
@@ -78,12 +88,30 @@ export class HUD {
     c.fillStyle = '#fff'; c.strokeStyle = '#000'; c.lineWidth = 2;
     c.beginPath(); c.moveTo(0, -9); c.lineTo(6, 7); c.lineTo(0, 3); c.lineTo(-6, 7); c.closePath(); c.fill(); c.stroke();
     c.restore();
+    if (hm) {                                   // off the minimap: a pointer on the rim towards home
+      const u = (hm.x - fx) * S, v = (hm.z - fz) * S, cs = Math.cos(camYaw), sn = Math.sin(camYaw), sx = cs * u - sn * v, sy = sn * u + cs * v, rr = Math.hypot(sx, sy), lim = W / 2 - 16;
+      if (rr > lim) {
+        c.save(); c.translate(W / 2 + sx / rr * lim, W / 2 + sy / rr * lim);
+        c.fillStyle = '#1fbf7a'; c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 11, 0, 7); c.fill(); c.stroke();
+        c.font = '13px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🏠', 0, 1); c.restore();
+      }
+    }
     const n = $('north'), r = W / 2 - 10;
     n.style.left = (W / 2 + Math.sin(camYaw) * r) + 'px'; n.style.top = (W / 2 - Math.cos(camYaw) * r - 8) + 'px'; n.style.transform = 'translateX(-50%)';
   }
 
   prompt(html) { const p = $('prompt'); if (html) { p.innerHTML = html; p.classList.remove('hidden'); } else p.classList.add('hidden'); }
   toast(text, time = 2.5) { const el = $('toast'); el.innerHTML = text; el.classList.remove('hidden'); this.toastT = time; }
+  /** a notification card (top centre); also a system notification if the tab is in the background */
+  notify(icon, title, body = '', { time = 8, voice = '' } = {}) {
+    const box = $('notifs'), el = document.createElement('div'); el.className = 'notif';
+    el.innerHTML = '<div class="ni">' + icon + '</div><div class="nt"><b>' + title + '</b><span>' + body + '</span></div>';
+    box.appendChild(el); while (box.children.length > 3) box.firstChild.remove();
+    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 450); }, time * 1000);
+    if (voice) speak(voice);
+    try { if (document.hidden && window.Notification && Notification.permission === 'granted') new Notification(title.replace(/<[^>]+>/g, ''), { body: body.replace(/<[^>]+>/g, '') }); } catch { /* ignore */ }
+  }
+  askNotifyPermission() { try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch { /* ignore */ } }
   /** show + read aloud (lines from comment.json) */
   say(text, time = 3.5, icon = '') { this.toast(icon + text, time); speak(text); }
 
@@ -91,6 +119,8 @@ export class HUD {
     $('pkind').textContent = info.kind; $('pname').textContent = info.name; $('pstreet').textContent = info.street || '';
     $('pbody').innerHTML = info.body; $('panel').classList.remove('hidden'); this.open = 'panel';
     this.goTarget = info.go || null; $('pgo').classList.toggle('hidden', !info.go);
+    const ex = $('pextra'); ex.innerHTML = '';
+    for (const a of (info.actions || [])) { const b = document.createElement('button'); b.textContent = a.label; b.onclick = () => { this.close(); a.fn(); }; ex.appendChild(b); }
     if (document.pointerLockElement) document.exitPointerLock();
     if (info.say) speak(info.say);
   }

@@ -1,6 +1,7 @@
 // Greater Kolkata world: region overview (land, river, main road network) + 1 km detail tiles streamed around the player.
 import * as THREE from 'three';
 import { t, tn } from './i18n.js';
+import { radialTexture } from './nightlights.js';
 import { MeshBuilder, ribbon, Grid, signedArea, centroid, pointInPoly, distToSeg, rng, hashStr, canvasTexture } from './geo.js';
 
 const C = (hex) => new THREE.Color(hex);
@@ -186,6 +187,9 @@ export class World {
       pole: new THREE.MeshLambertMaterial({ color: 0x3b6fb0 }),
       roofShape: new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true }),
       lampHead: new THREE.MeshLambertMaterial({ color: 0xfff3c4, emissive: 0x665522 }),
+      // night glow of street lamps (halo sprite) and the pool of light they throw on the road; opacity set by daynight.js
+      lampGlow: new THREE.PointsMaterial({ map: radialTexture(), color: 0xffd48a, size: 4.2, sizeAttenuation: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }),
+      lampPool: new THREE.MeshBasicMaterial({ map: radialTexture(), color: 0xffbf66, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 }),
     };
     this.geo = {
       box: (() => { const g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); return g; })(),
@@ -198,6 +202,7 @@ export class World {
       pole: (() => { const g = new THREE.CylinderGeometry(0.07, 0.11, 7, 6); g.translate(0, 3.5, 0); return g; })(),
       arm: (() => { const g = new THREE.BoxGeometry(0.08, 0.08, 1.6); g.translate(0, 7, 0.75); return g; })(),
       head: (() => { const g = new THREE.BoxGeometry(0.35, 0.18, 0.6); g.translate(0, 6.9, 1.5); return g; })(),
+      pool: new THREE.PlaneGeometry(17, 17).rotateX(-Math.PI / 2),
     };
   }
 
@@ -570,6 +575,16 @@ export class World {
     this.addInstanced(tile, this.geo.pole, this.mat.pole, pts, (m, l) => { set(m, l); this.tileAddCircle(tile, l[0], l[1], 0.18); }, { cast: true });
     this.addInstanced(tile, this.geo.arm, this.mat.pole, pts, set);
     this.addInstanced(tile, this.geo.head, this.mat.lampHead, pts, set);
+    // lamp head positions: used for the night glow, the light pools on the road and the nearby real point lights
+    tile.lampHeads = pts.map(l => [l[0] + Math.sin(l[2]) * 1.5, 7, l[1] + Math.cos(l[2]) * 1.5]);
+    if (tile.lampHeads.length) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(tile.lampHeads.flat(), 3));
+      const glow = new THREE.Points(g, this.mat.lampGlow); glow.matrixAutoUpdate = false; glow.renderOrder = 3; tile.group.add(glow);
+      const pm = new THREE.Matrix4();
+      const pool = this.addInstanced(tile, this.geo.pool, this.mat.lampPool, tile.lampHeads, (m, h) => { m.copy(pm.makeTranslation(h[0], 0.3, h[2])); });
+      if (pool) pool.renderOrder = 2;
+    }
   }
 
   buildTileCrossings(tile) {

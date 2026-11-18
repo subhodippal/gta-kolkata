@@ -7,7 +7,7 @@
   },
   "rate": {
    "bn": 0.95,
-   "en": 1.0
+   "en": 1
   }
  },
  "welcome": {
@@ -315,5 +315,31 @@
    "bn": "দেখে চলুন!",
    "en": "Watch where you're going!"
   }
- ]
+ ],
+ "home_set": {
+  "bn": "বাড়ি ঠিক হয়ে গেল! যখন খুশি ফিরে আসতে পারেন।",
+  "en": "Home is set! You can come back any time."
+ },
+ "home_reached": [
+  {
+   "bn": "আহ, নিজের বাড়ি! দরজায় E টিপে ভেতরে যান।",
+   "en": "Home sweet home! Press E at the door to go in."
+  },
+  {
+   "bn": "বাড়ি পৌঁছে গেছেন।",
+   "en": "You have reached home."
+  }
+ ],
+ "storm_start": {
+  "bn": "বজ্রসহ ঝড় শুরু হয়েছে! তাড়াতাড়ি আশ্রয় নিন।",
+  "en": "A thunderstorm has started! Take shelter quickly."
+ },
+ "storm_home": {
+  "bn": "বাইরে ঝড়, কিন্তু আপনি বাড়িতে নিরাপদে আছেন।",
+  "en": "There is a storm outside, but you are safe at home."
+ },
+ "rain_start": {
+  "bn": "বৃষ্টি শুরু হলো। ছাতা খুলে নিন!",
+  "en": "It has started to rain. Open your umbrella!"
+ }
 }

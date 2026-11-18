@@ -20,6 +20,21 @@ The world runs from **Dankuni** and **Dakshineswar** in the north-west to the **
   * Big cargo barges and cruise steamers, and wooden country boats (nouka) with their boatmen, move slowly up and down the river on its real centre line, rocking gently on the water.
 * **Metro:** all real lines from OSM (Blue, Green, Purple, Orange, Yellow where mapped). Underground parts are dashed on the map. **Elevated sections are built in 3D on viaducts with trains running on them** (towards Dum Dum and Dakshineswar, Salt Lake and Sector V, New Town and the Airport).
 
+## Real place, real time, real weather
+
+* **Spawn:** the game asks your browser for your location and drops you at your real position if it is inside the map; otherwise you start at Esplanade.
+* **Real clock:** the game starts at the current Kolkata time (Asia/Kolkata) and runs at real speed. **T** skips two hours and switches to the fast cycle (1 s = 1 min).
+* **🌦 Live Kolkata weather (button, or I):** fetches the current weather from [Open-Meteo](https://open-meteo.com) (free, no key) and sets the game to match: the time of day (morning, afternoon, evening, night) and clear, cloudy, rain or thunderstorm. It runs once at start and then every 10 minutes. **O** cycles the weather by hand (clear, cloudy, rain, storm).
+* **Sky:** drifting clouds that thicken and darken with the weather, birds (kites and crows) circling by day, rain with an umbrella for the player, lightning bolts with delayed thunder. Look up by dragging the mouse (or finger) upwards.
+* **Nights:** the moon and sky are brighter, street lamps glow and throw pools of light on the road, every car and bus has headlights and tail lights, and the player carries a soft light so the road is never black. Street lamps also come on in a daytime storm.
+
+## Home (Y, U, B, E)
+
+* **Y / 🏠 Set home:** your home is the spot where you stand. A small house appears (windows and porch light glow at night, a green beacon marks it) and the spot is saved in the browser.
+* **U / 🏡 Go home** teleports you to the door, **B / 🧭 Route home** shows turn-by-turn directions, the minimap shows a 🏠 marker (or a pointer on its rim) and the HUD shows the distance.
+* **E at the door** goes inside: sleep till morning, rest two hours or check the live weather.
+* **Notifications:** when you reach home, when it starts raining, when a thunderstorm starts (and every minute while you are still outside, with the distance home). They show on screen, are read aloud, and appear as system notifications if the tab is in the background and you allowed them.
+
 ## Language: Bengali (বাংলা) by default
 
 The whole game is in **Bengali**: menus, the HUD, road and shop names, landmark histories, menus in restaurants and what people say. Press **L** or use the English/বাংলা button to switch to English at any time.

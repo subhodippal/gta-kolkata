@@ -619,6 +619,186 @@
   "game_title": {
    "bn": "কলকাতা — গঙ্গা, চা আর আড্ডা",
    "en": "Kolkata — Ganges, Tea & Adda"
+  },
+  "home": {
+   "bn": "বাড়ি",
+   "en": "Home"
+  },
+  "btn_sethome": {
+   "bn": "🏠 বাড়ি ঠিক করুন",
+   "en": "🏠 Set home"
+  },
+  "btn_gohome": {
+   "bn": "🏡 বাড়ি যান",
+   "en": "🏡 Go home"
+  },
+  "btn_homeroute": {
+   "bn": "🧭 বাড়ির পথ",
+   "en": "🧭 Route home"
+  },
+  "btn_live": {
+   "bn": "🌦 কলকাতার আসল আবহাওয়া",
+   "en": "🌦 Live Kolkata weather"
+  },
+  "home_set_title": {
+   "bn": "বাড়ি ঠিক হলো",
+   "en": "Home set"
+  },
+  "home_set_body": {
+   "bn": "এই জায়গাটাই এখন আপনার বাড়ি। দরজার কাছে E টিপে ভেতরে যান।",
+   "en": "This is now your home. Press E at the door to go in."
+  },
+  "home_none": {
+   "bn": "এখনও বাড়ি ঠিক করা হয়নি — যেখানে বাড়ি চান সেখানে Y টিপুন।",
+   "en": "No home yet — stand where you want it and press Y."
+  },
+  "home_reached_title": {
+   "bn": "বাড়ি পৌঁছে গেছেন!",
+   "en": "You reached home!"
+  },
+  "home_reached_body": {
+   "bn": "দরজার কাছে E টিপে ভেতরে যান।",
+   "en": "Press E at the door to go inside."
+  },
+  "home_door": {
+   "bn": "বাড়িতে ঢুকুন",
+   "en": "Enter your home"
+  },
+  "home_panel_kind": {
+   "bn": "বাড়ি",
+   "en": "Home"
+  },
+  "home_panel_name": {
+   "bn": "আমার বাড়ি",
+   "en": "My home"
+  },
+  "home_panel_body": {
+   "bn": "এখন সময় {time}, {phase}। বাইরে আবহাওয়া: {wx}।",
+   "en": "It is {time}, {phase}. Outside: {wx}."
+  },
+  "home_sleep": {
+   "bn": "😴 সকাল পর্যন্ত ঘুমান",
+   "en": "😴 Sleep till morning"
+  },
+  "home_wait": {
+   "bn": "⏩ ২ ঘণ্টা বিশ্রাম",
+   "en": "⏩ Rest 2 hours"
+  },
+  "home_weather": {
+   "bn": "🌦 আসল আবহাওয়া দেখুন",
+   "en": "🌦 Check live weather"
+  },
+  "home_dist": {
+   "bn": "🏠 বাড়ি {d} মিটার",
+   "en": "🏠 Home {d} m"
+  },
+  "wx_clear": {
+   "bn": "☀️ পরিষ্কার",
+   "en": "☀️ Clear"
+  },
+  "wx_clear_night": {
+   "bn": "🌙 পরিষ্কার রাত",
+   "en": "🌙 Clear night"
+  },
+  "wx_cloudy": {
+   "bn": "☁️ মেঘলা",
+   "en": "☁️ Cloudy"
+  },
+  "wx_rain": {
+   "bn": "🌧 বৃষ্টি",
+   "en": "🌧 Rain"
+  },
+  "wx_storm": {
+   "bn": "⛈ ঝড়-বৃষ্টি ও বজ্রপাত",
+   "en": "⛈ Thunderstorm"
+  },
+  "wx_live_title": {
+   "bn": "কলকাতার আসল আবহাওয়া",
+   "en": "Live Kolkata weather"
+  },
+  "wx_live_body": {
+   "bn": "{temp}°C (অনুভূত {feels}°C) · {wx} · {phase} · আর্দ্রতা {hum}% · হাওয়া {wind} কিমি/ঘ",
+   "en": "{temp}°C (feels {feels}°C) · {wx} · {phase} · humidity {hum}% · wind {wind} km/h"
+  },
+  "wx_live_fail": {
+   "bn": "আবহাওয়া পরিষেবায় পৌঁছানো যায়নি — আপনার ঘড়ির সময় আর গেমের আবহাওয়া চলছে।",
+   "en": "Could not reach the weather service — using your clock and the game weather."
+  },
+  "wx_manual": {
+   "bn": "আবহাওয়া বদলে হলো: {wx}",
+   "en": "Weather changed to: {wx}"
+  },
+  "time_live": {
+   "bn": "ঘড়ি: কলকাতার আসল সময়",
+   "en": "Clock: real Kolkata time"
+  },
+  "time_fast": {
+   "bn": "ঘড়ি: দ্রুত (১ সেকেন্ড = ১ মিনিট)",
+   "en": "Clock: fast (1 second = 1 minute)"
+  },
+  "storm_title": {
+   "bn": "বজ্রসহ ঝড়!",
+   "en": "Thunderstorm!"
+  },
+  "storm_out_body": {
+   "bn": "আপনি খোলা জায়গায় আছেন। এখনই কোথাও আশ্রয় নিন।",
+   "en": "You are out in the open. Take shelter now."
+  },
+  "storm_home_body": {
+   "bn": "আপনি বাড়িতে নিরাপদে আছেন।",
+   "en": "You are safe at home."
+  },
+  "storm_still": {
+   "bn": "ঝড়ের মধ্যে এখনও বাইরে — বাড়ি {d} মিটার দূরে। বাড়ি যেতে U, পথ দেখতে B টিপুন।",
+   "en": "Still out in the thunderstorm — home is {d} m away. Press U to go home or B for the route."
+  },
+  "storm_set_home": {
+   "bn": "আশ্রয়ের জন্য Y টিপে একটা বাড়ি ঠিক করে নিন।",
+   "en": "Press Y to set a home so you have somewhere to shelter."
+  },
+  "rain_title": {
+   "bn": "বৃষ্টি শুরু হয়েছে",
+   "en": "It started raining"
+  },
+  "rain_body": {
+   "bn": "কলকাতায় বৃষ্টি নেমেছে — আপনি ছাতা খুলেছেন।",
+   "en": "Rain over Kolkata — you opened your umbrella."
+  },
+  "spawn_real": {
+   "bn": "আপনি আপনার আসল অবস্থানে এসেছেন।",
+   "en": "You spawned at your real location."
+  },
+  "spawn_outside": {
+   "bn": "আপনার অবস্থান কলকাতার মানচিত্রের বাইরে — এসপ্ল্যানেডে শুরু হলো।",
+   "en": "Your location is outside the Kolkata map — starting at Esplanade."
+  },
+  "help_sethome": {
+   "bn": "এখানে বাড়ি ঠিক করুন",
+   "en": "Set your home here"
+  },
+  "help_gohome": {
+   "bn": "বাড়ি চলে যান",
+   "en": "Go home"
+  },
+  "help_homeroute": {
+   "bn": "বাড়ির পথ দেখুন",
+   "en": "Route to home"
+  },
+  "help_live": {
+   "bn": "কলকাতার আসল আবহাওয়া ও সময়",
+   "en": "Live Kolkata weather & time"
+  },
+  "help_wx": {
+   "bn": "আবহাওয়া বদলান (মেঘ / বৃষ্টি / ঝড়)",
+   "en": "Change weather (cloud / rain / storm)"
+  },
+  "tb_home": {
+   "bn": "বাড়ি",
+   "en": "Home"
+  },
+  "tb_weather": {
+   "bn": "আবহাওয়া",
+   "en": "Weather"
   }
  },
  "kinds": {
